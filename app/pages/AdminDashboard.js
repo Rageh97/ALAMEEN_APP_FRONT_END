@@ -14,7 +14,32 @@ export default function AdminDashboard({ setCurrentView }) {
   const [activeTab, setActiveTab] = useState('products')
   const { user, isLoading: authLoading } = useAuth()
   const { products, addProduct, updateProduct, deleteProduct, loading: productsLoading, error: productsError, fetchProducts } = useProducts()
-  const { orders, updateOrderStatus, approveRequest, rejectRequest, editRechargeRequest, editProductRequest, deleteOrder, fetchOrders, getOrderById, loading: ordersLoading, error: ordersError } = useOrders()
+  const { 
+    orders, 
+    pendingOrders, 
+    fetchOrders, 
+    fetchPendingOrders, 
+    approveRequest, 
+    rejectRequest, 
+    deleteOrder,
+    getOrderById,
+    editRechargeRequest,
+    editProductRequest,
+    testNotification,
+    investigateNotificationAPI,
+    checkNotificationCreation,
+    testAPIEndpoints,
+    loading: ordersLoading
+  } = useOrders()
+
+  // Ensure orders are fetched when user is available
+  useEffect(() => {
+    if (user && !authLoading) {
+      console.log('AdminDashboard: User available, fetching orders...')
+      fetchOrders()
+      fetchPendingOrders()
+    }
+  }, [user, authLoading])
 
   // Renders the transfer image. Falls back to fetching by id if path is not present in list item.
   const OrderImageCell = ({ orderId, initialPath }) => {
@@ -468,6 +493,8 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
     try { await fetchOrders() } catch {}
   }
 
+
+
   return (
     
     <div className="space-y-6 px-3 lg:px-0 ">
@@ -475,7 +502,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
       
       {/* Tabs */}
       <div className="flex items-center justify-center flex-wrap space-x-4 gradient-border">
-        <button
+          <button
           onClick={() => setActiveTab('products')}
           className={`py-2 px-4 font-semibold ${
             activeTab === 'products' 
@@ -484,8 +511,8 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
           }`}
         >
           المنتجات
-        </button>
-        <button
+          </button>
+          <button
           onClick={() => setActiveTab('orders')}
           className={`py-2 px-4 font-semibold ${
             activeTab === 'orders' 
@@ -494,8 +521,8 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
           }`}
         >
           الطلبات
-        </button>
-        <button
+          </button>
+          <button
           onClick={() => setActiveTab('employees')}
           className={`py-2 px-4 font-semibold ${
             activeTab === 'employees' 
@@ -504,8 +531,8 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
           }`}
         >
           الموظفين
-        </button>
-        <button
+          </button>
+          <button
           onClick={() => setActiveTab('roles')}
           className={`py-2 px-4 font-semibold ${
             activeTab === 'roles' 
@@ -643,11 +670,11 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                 <img 
         src={   ImagePath + product?.path} 
         alt={product?.name} 
-        className="w-full  rounded-xl"
+        className="w-full h-[250px] object-cover  rounded-xl"
       />
       <div className="p-6 flex flex-col items-center">
-        <h3 className="text-xl font-semibold mb-2">{product?.name}</h3>
-        <p className="text-gray-600 mb-4">{product?.description}</p>
+        <h3 className="text-xl text-icons font-semibold mb-2">{product?.name}</h3>
+        <p className="text-gray-300 mb-4">{product?.description}</p>
        
         <div className="flex items-center gap-2 w-full justify-center px-3">
                       <button
@@ -671,9 +698,9 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
            <span className="text-sm  font-bold text-icons">${product?.pointsCost}</span>
           </button> */}
        
-      </div>
-                  
                   </div>
+                  
+                </div>
                
               )) : (
                 <div className="col-span-full text-center py-8 text-gray-400">
@@ -689,12 +716,11 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
       {activeTab === 'orders' && (
         <div className="space-y-6">
           <h2 className="text-2xl font-bold">إدارة الطلبات</h2>
+   
           
         
           {ordersLoading ? (
             <div className="text-center py-8">Loading orders...</div>
-          ) : ordersError ? (
-            <div className="text-center py-8 text-red-600">Error: {ordersError}</div>
           ) : (
             <div className="card overflow-x-auto">
               <table className="min-w-full divide-y divide-icons/40 text-center">
@@ -740,7 +766,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                                   />
                                   <div className="text-xs text-gray-400">
                                     القيمة الحالية: {order.amount || '—'}
-                                  </div>
+                    </div>
                                 </div>
                               ) : (
                                 <div className="space-y-2">
@@ -814,11 +840,11 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                                     Edit
                                   </button>
                                   <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 bg-red-500 text-white border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
-                                </div>
+                  </div>
                               ) : (
                                 <div className="flex items-center gap-2">
                                   <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 text-white bg-red-500 border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
-                                </div>
+                </div>
                               )
                             )}
                           </td>

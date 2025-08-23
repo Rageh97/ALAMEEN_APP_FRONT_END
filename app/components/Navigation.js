@@ -3,11 +3,16 @@
 import { useState } from 'react'
 import { ShoppingBagIcon, UserIcon, CogIcon, HomeIcon, ClipboardDocumentListIcon, Bars3Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../hooks/useAuth'
+import { useUserNotifications } from '../hooks/useNotifications'
 import "@/app/globals.css"
 
 export default function Navigation() {
   const { user, signOut, isAuthenticated } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { data: notifications } = useUserNotifications()
+
+  // Calculate unread notifications count
+  const unreadCount = notifications ? notifications.filter(n => !(n.isRead || n.IsRead)).length : 0
 
   const navigateTo = (path) => {
     window.location.href = path
@@ -43,7 +48,7 @@ export default function Navigation() {
               
               {!isAuthenticated ? (
                 <>
-                  <button
+                  {/* <button
                     onClick={() => navigateTo('/signin')}
                     className="btn-secondary"
                   >
@@ -54,7 +59,7 @@ export default function Navigation() {
                     className="btn-primary"
                   >
                   انشاء حساب
-                  </button>
+                  </button> */}
                 </>
               ) : (
                 <>
@@ -67,10 +72,15 @@ export default function Navigation() {
                   </button>
                   <button
                     onClick={() => navigateTo('/notifications')}
-                    className="flex items-center px-3 py-2 text-white-700 hover:text-icons transition-colors"
+                    className="flex items-center px-3 py-2 text-white-700 hover:text-icons transition-colors relative"
                   >
-                    <BellIcon className="h-5 w-5 mx-2 text-icons" />
-                    الإشعارات
+                    <BellIcon className="h-7 w-7 mx-1 text-icons" />
+                    
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0 -right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                        {unreadCount > 99 ? '99+' : unreadCount}
+                      </span>
+                    )}
                   </button>
                   {user?.isAdmin && (
                     <button
@@ -187,10 +197,15 @@ export default function Navigation() {
                       {/* Notifications */}
                       <button
                         onClick={() => navigateTo('/notifications')}
-                        className="w-full flex items-center px-4 py-3 text-white hover:bg-icons transition-colors"
+                        className="w-full flex items-center px-4 py-3 text-white hover:bg-icons transition-colors relative"
                       >
                         <BellIcon className="h-5 w-5 mx-3 text-icons" />
                         الإشعارات
+                        {unreadCount > 0 && (
+                          <span className="absolute top-2 right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                            {unreadCount > 99 ? '99+' : unreadCount}
+                          </span>
+                        )}
                       </button>
                       
                       {/* Admin Dashboard */}

@@ -4,10 +4,11 @@ import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useOrders } from '../hooks/useOrders'
 import { useAuth } from '../hooks/useAuth'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 
-export default function RechargeRequest() {
+export default function RechargeRequest({ isOpen, onClose }) {
   const { user } = useAuth()
-  const { createRechargeRequest, loading, error } = useOrders()
+  const { createRechargeRequest, loading } = useOrders()
   
   const [formData, setFormData] = useState({
     amount: '',
@@ -77,6 +78,11 @@ export default function RechargeRequest() {
         // Reset file input
         const fileInput = document.getElementById('transferImage')
         if (fileInput) fileInput.value = ''
+        
+        // Close modal after success
+        setTimeout(() => {
+          onClose()
+        }, 2000)
       } else {
         setMessage(`فشل إرسال طلب الشحن: ${result.error}`)
         setMessageType('error')
@@ -91,81 +97,108 @@ export default function RechargeRequest() {
     }
   }
 
+  const handleClose = () => {
+    if (!isSubmitting) {
+      setFormData({
+        amount: '',
+        transferImage: null,
+        transferImagePath: null
+      })
+      setMessage('')
+      setMessageType(null)
+      onClose()
+    }
+  }
+
   if (!user) {
-    return (
-      <div className="text-center py-8">
-        <div className="text-red-600">يرجى تسجيل الدخول لإرسال طلبات الشحن.</div>
-      </div>
-    )
+    return null
+  }
+
+  if (!isOpen) {
+    return null
   }
 
   return (
-    <div className="max-w-md mx-auto ">
-      <div className=" rounded-lg shadow p-6 card">
-        <h2 className="text-2xl font-bold mb-6 text-center">طلب شحن</h2>
-        
-        {message && (
-          <div className={`mb-4 p-3 rounded ${
-            messageType === 'success' 
-              ? 'bg-green-100 text-green-700 border border-green-300' 
-              : 'bg-red-100 text-red-700 border border-red-300'
-          }`}>
-            {message}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4 ">
-          <div>
-            <label htmlFor="amount" className="block text-sm font-medium text-icons mb-1">
-              المبلغ
-            </label>
-            <input
-              type="number"
-              id="amount"
-              name="amount"
-              value={formData.amount}
-              onChange={handleInputChange}
-              // step="0.01"
-              min="1"
-              required
-              className="input-field"
-              placeholder="أدخل المبلغ"
-            />
+    <>
+      {/* Modal Overlay */}
+      <div className="fixed inset-0 bg-black/70 bg-opacity-50 backdrop-blur-sm z-[9998] flex items-center justify-center p-4">
+        {/* Modal Content */}
+        <div className="card rounded-xl shadow-2xl w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-6 border-b border-background-content-2">
+            <h2 className="text-xl font-bold text-text">طلب شحن</h2>
+            <button
+              onClick={handleClose}
+              disabled={isSubmitting}
+              className="text-icons hover:text-text transition-colors disabled:opacity-50"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
           </div>
 
-          <div>
-            <label htmlFor="transferImage" className="block text-sm font-medium text-icons mb-1">
-              صورة التحويل
-            </label>
-            <input
-              type="file"
-              id="transferImage"
-              name="transferImage"
-              onChange={handleFileChange}
-              accept="image/*"
-              required
-              className="input-field"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              قم برفع صورة أو لقطة شاشة للحوالة البنكية
-            </p>
+          {/* Modal Body */}
+          <div className="p-6">
+            {message && (
+              <div className={`mb-4 p-3 rounded ${
+                messageType === 'success' 
+                  ? 'bg-green-100 text-green-700 border border-green-300' 
+                  : 'bg-red-100 text-red-700 border border-red-300'
+              }`}>
+                {message}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="amount" className="block text-sm font-medium text-icons mb-1">
+                  المبلغ
+                </label>
+                <input
+                  type="number"
+                  id="amount"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  min="1"
+                  required
+                  className="w-full px-3 py-2 bg-background-content-2 border border-background-content-3 rounded-lg text-text placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-background-content-3 focus:border-transparent"
+                  placeholder="أدخل المبلغ"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="transferImage" className="block text-sm font-medium text-icons mb-1">
+                  صورة التحويل
+                </label>
+                <input
+                  type="file"
+                  id="transferImage"
+                  name="transferImage"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  required
+                  className="w-full px-3 py-2 bg-background-content-2 border border-background-content-3 rounded-lg text-text file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-background-content-3 file:text-text hover:file:bg-background-content-2"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  قم برفع صورة أو لقطة شاشة للحوالة البنكية
+                </p>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting || loading}
+                className={`w-full py-3 px-4 rounded-lg font-medium text-white text-sm md:text-lg transition-all duration-200 ${
+                  isSubmitting || loading
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-500 cursor-pointer focus:outline-none focus:ring-2 focus:ring-background-content-3 focus:ring-offset-2 focus:ring-offset-background-content-1'
+                }`}
+              >
+                {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب الشحن'}
+              </button>
+            </form>
           </div>
-
-          <button
-            type="submit"
-            disabled={isSubmitting || loading}
-            className={`w-full py-3 px-4 rounded-md font-medium text-white text-sm md:text-lg ${
-              isSubmitting || loading
-                ? 'bg-gray-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-            }`}
-          >
-            {isSubmitting ? 'جاري الإرسال...' : 'إرسال طلب الشحن'}
-          </button>
-        </form>
-
-   
+        </div>
       </div>
-    </div>
+    </>
   )
 }

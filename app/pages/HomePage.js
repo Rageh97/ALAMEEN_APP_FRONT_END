@@ -74,11 +74,10 @@ export default function HomePage() {
       </div>
 
       {/* Recharge Request Form */}
-      {showRechargeForm && (
-        <div className="p-6 rounded-lg">
-          <RechargeRequest />
-        </div>
-      )}
+      <RechargeRequest 
+        isOpen={showRechargeForm} 
+        onClose={() => setShowRechargeForm(false)} 
+      />
 
       {/* User Order History */}
       {/* <div className="mt-6">

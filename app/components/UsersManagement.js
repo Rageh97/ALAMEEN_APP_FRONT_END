@@ -131,10 +131,10 @@ export default function UsersManagement() {
       Id: user.Id || user.id,
       Name: user.Name || user.name || '',
       UserName: user.UserName || user.userName || '',
-      UserType: user.UserType != null ? user.UserType : (user.userType != null ? user.userType : 0),
+      UserType: user.UserType != null ? user.UserType : (user.userType != null ? user.userType : undefined),
       Mobile: user.Mobile || user.mobile || '',
       IsActive: user.IsActive != null ? user.IsActive : (user.isActive != null ? user.isActive : true),
-      RoleId: user.RoleId != null ? user.RoleId : (user.roleId != null ? user.roleId : 0),
+      RoleId: user.RoleId != null ? user.RoleId : (user.roleId != null ? user.roleId : undefined),
       Balance: user.Balance != null ? user.Balance : (user.balance != null ? user.balance : 0),
       Profile: null
     })
@@ -289,7 +289,7 @@ export default function UsersManagement() {
                         <td className="px-4 py-3 text-sm">
                           <div className="flex items-center gap-2">
                             <button className="btn-secondary" onClick={() => startEdit(u)}>Edit</button>
-                            <button className="btn-secondary" onClick={() => setPasswordForm({ id, password: '', rePassword: '' })}>Password</button>
+                            {/* <button className="btn-secondary" onClick={() => setPasswordForm({ id, password: '', rePassword: '' })}>Change Password</button> */}
                             <button className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg" onClick={() => deleteOne(id)}>Delete</button>
                           </div>
                         </td>
@@ -316,14 +316,14 @@ export default function UsersManagement() {
               <input className="input-field" placeholder="Username" value={editingUser.UserName} onChange={(e) => setEditingUser({ ...editingUser, UserName: e.target.value })} />
               <input className="input-field" placeholder="Mobile" value={editingUser.Mobile} onChange={(e) => setEditingUser({ ...editingUser, Mobile: e.target.value })} />
               <input type="number" className="input-field" placeholder="Balance" value={editingUser.Balance} onChange={(e) => setEditingUser({ ...editingUser, Balance: Number(e.target.value) })} />
-              <select className="input-field" value={editingUser.UserType} onChange={(e) => setEditingUser({ ...editingUser, UserType: Number(e.target.value) })}>
+              <select className="input-field bg-background" value={editingUser.UserType ?? ''} onChange={(e) => setEditingUser({ ...editingUser, UserType: e.target.value === '' ? undefined : Number(e.target.value) })}>
                 <option value="">Select User Type</option>
                 {Array.isArray(userTypes) && userTypes.map(t => (
                   <option key={t.value || t.Value} value={Number(t.value || t.Value)}>{t.text || t.Text}</option>
                 ))}
               </select>
-              <select className="input-field" value={editingUser.RoleId} onChange={(e) => setEditingUser({ ...editingUser, RoleId: Number(e.target.value) })}>
-                <option value="">Select Role</option>
+              <select className="input-field bg-background" value={editingUser.RoleId ?? ''} onChange={(e) => setEditingUser({ ...editingUser, RoleId: e.target.value === '' ? undefined : Number(e.target.value) })}>
+                <option value="">No Role</option>
                 {Array.isArray(rolesList) && rolesList.map(r => (
                   <option key={r.id || r.Id} value={Number(r.id || r.Id)}>{r.name || r.Name}</option>
                 ))}
@@ -332,7 +332,7 @@ export default function UsersManagement() {
                 <input type="checkbox" id="userIsActive" checked={!!editingUser.IsActive} onChange={(e) => setEditingUser({ ...editingUser, IsActive: e.target.checked })} />
                 <label htmlFor="userIsActive" className="text-sm text-gray-700">Active</label>
               </div>
-              <input type="file" className="input-field md:col-span-2" onChange={(e) => setEditingUser({ ...editingUser, Profile: e.target.files?.[0] || null })} accept="image/*" />
+              <input type="file" className="input-field  md:col-span-2" onChange={(e) => setEditingUser({ ...editingUser, Profile: e.target.files?.[0] || null })} accept="image/*" />
               <div className="md:col-span-2 flex gap-2">
                 <button type="submit" className="btn-primary" disabled={updateUserMutation.isPending}>{updateUserMutation.isPending ? 'Saving...' : 'Save'}</button>
                 <button type="button" className="btn-secondary" onClick={() => { setEditingUser(null); setActiveTab('list') }}>Cancel</button>

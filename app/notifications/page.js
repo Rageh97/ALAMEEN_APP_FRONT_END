@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useUserNotifications, useMarkNotificationAsRead, useMarkAllNotificationsAsRead } from '../hooks/useNotifications'
+import { notificationAPI } from '../utils/api'
 
 export default function NotificationsPage() {
   const [filters, setFilters] = useState({
@@ -28,6 +29,10 @@ export default function NotificationsPage() {
     try {
       await markAsReadMutation.mutateAsync(notificationId)
       toast.success('تم تحديد الإشعار كمقروء')
+      // Refresh notifications after marking as read
+      setTimeout(() => {
+        refetch()
+      }, 500)
     } catch (error) {
       console.error('Failed to mark notification as read:', error)
       toast.error(`فشل في تحديد الإشعار كمقروء: ${error.message}`)
@@ -38,6 +43,10 @@ export default function NotificationsPage() {
     try {
       await markAllAsReadMutation.mutateAsync()
       toast.success('تم تحديد جميع الإشعارات كمقروءة')
+      // Refresh notifications after marking all as read
+      setTimeout(() => {
+        refetch()
+      }, 500)
     } catch (error) {
       console.error('Failed to mark all notifications as read:', error)
       toast.error(`فشل في تحديد جميع الإشعارات كمقروءة: ${error.message}`)
@@ -65,16 +74,20 @@ export default function NotificationsPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-text">الإشعارات</h1>
-          <button
-            onClick={handleMarkAllAsRead}
-            disabled={markAllAsReadMutation.isPending}
-            className="btn-primary"
-          >
-            {markAllAsReadMutation.isPending ? 'جاري التحديث...' : 'تحديد الكل كمقروء'}
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={handleMarkAllAsRead}
+              disabled={markAllAsReadMutation.isPending}
+              className="btn-primary"
+            >
+              {markAllAsReadMutation.isPending ? 'جاري التحديث...' : 'تحديد الكل كمقروء'}
+            </button>
+          </div>
         </div>
 
  
+
+
 
         {/* Notifications List */}
         {isLoading ? (
@@ -87,29 +100,39 @@ export default function NotificationsPage() {
               notifications.map(notification => {
                 const id = notification.id || notification.Id
                 const title = notification.title || notification.Title || 'بدون عنوان'
-                const message = notification.message || notification.Message || 'بدون رسالة'
+                const description = notification.description || notification.Description || notification.message || notification.Message || 'بدون رسالة'
                 const isRead = notification.isRead || notification.IsRead || false
-                const type = notification.type || notification.Type || 'عام'
-                const date = notification.createdDate || notification.CreatedDate || notification.date || notification.Date
+                const type = notification.typeName || notification.TypeName || notification.type || notification.Type || 'عام'
+                const date = notification.creationTime || notification.CreatedDate || notification.createdDate || notification.date || notification.Date
                 const priority = notification.priority || notification.Priority || 'عادي'
 
                 return (
                   <div 
                     key={id} 
-                    className={`card p-6 transition-all duration-200 ${
+                    className={`bg-background p-6 transition-all duration-200 ${
                       isRead 
-                        ? 'bg-gray-50 border-gray-200' 
-                        : 'bg-white border-blue-200 shadow-md'
+                        ? 'bg-background-content-1 border-gray-200' 
+                        : 'card border-blue-200 shadow-md'
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h3 className={`text-lg font-semibold ${
-                            isRead ? 'text-gray-600' : 'text-text'
-                          }`}>
-                            {title}
-                          </h3>
+                        {/* Title */}
+                        <h3 className={`text-lg font-semibold mb-2 ${
+                          isRead ? 'text-icons' : 'text-icons'
+                        }`}>
+                          {title}
+                        </h3>
+                        
+                        {/* Description */}
+                        <p className={`text-gray-700 mb-3 ${
+                          isRead ? 'text-text' : 'text-text'
+                        }`}>
+                          {description}
+                        </p>
+                        
+                        {/* Badges */}
+                        {/* <div className="flex items-center space-x-2 mb-3">
                           {!isRead && (
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                               جديد
@@ -127,19 +150,16 @@ export default function NotificationsPage() {
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                             {type}
                           </span>
-                        </div>
-                        <p className={`text-gray-700 mb-3 ${
-                          isRead ? 'text-gray-500' : 'text-gray-700'
-                        }`}>
-                          {message}
-                        </p>
+                        </div> */}
+                        
+                        {/* Date and Actions */}
                         <div className="flex items-center justify-between text-sm text-gray-500">
                           <span>{formatDate(date)}</span>
                           {!isRead && (
                             <button
                               onClick={() => handleMarkAsRead(id)}
                               disabled={markAsReadMutation.isPending}
-                              className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                              className="text-icons cursor-pointer font-medium transition-colors"
                             >
                               {markAsReadMutation.isPending ? 'جاري التحديث...' : 'تحديد كمقروء'}
                             </button>
@@ -159,7 +179,7 @@ export default function NotificationsPage() {
         )}
 
         {/* Pagination */}
-        {notifications && notifications.length > 0 && (
+        {/* {notifications && notifications.length > 0 && (
           <div className="flex justify-center mt-8">
             <div className="flex space-x-2">
               <button
@@ -181,7 +201,7 @@ export default function NotificationsPage() {
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   )

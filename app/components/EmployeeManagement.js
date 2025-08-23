@@ -34,12 +34,12 @@ export default function EmployeeManagement() {
     Email: '',
     Password: '',
     IsActive: true,
-    RoleId: 0,
+    RoleId: undefined,
     UserId: 0,
     Id: 0,
     Balance: 0,
     Profile: null,
-    SupervisorId: 0
+    SupervisorId: undefined
   })
 
   const { data: employees, isLoading, error, refetch } = useEmployees(filters)
@@ -63,12 +63,12 @@ export default function EmployeeManagement() {
         Email: '',
         Password: '',
         IsActive: true,
-        RoleId: 0,
+        RoleId: undefined,
         UserId: 0,
         Id: 0,
         Balance: 0,
         Profile: null,
-        SupervisorId: 0
+        SupervisorId: undefined
       })
       toast.success('تمت إضافة الموظف بنجاح!')
     } catch (error) {
@@ -120,12 +120,12 @@ export default function EmployeeManagement() {
       Email: employee.Email || '',
       Password: '',
       IsActive: employee.IsActive !== undefined ? employee.IsActive : true,
-      RoleId: employee.RoleId || 0,
+      RoleId: employee.RoleId || undefined,
       UserId: employee.UserId || 0,
       Id: employee.Id || 0,
       Balance: employee.Balance || 0,
       Profile: null,
-      SupervisorId: employee.SupervisorId || 0
+      SupervisorId: employee.SupervisorId || undefined
     })
     setIsEditing(true)
   }
@@ -440,13 +440,14 @@ export default function EmployeeManagement() {
                 </label>
                 <select
                   className="input-field bg-background"
-                  value={isEditing ? editingEmployee.RoleId : newEmployee.RoleId}
-                  onChange={(e) => isEditing 
-                    ? setEditingEmployee({...editingEmployee, RoleId: Number(e.target.value)})
-                    : setNewEmployee({...newEmployee, RoleId: Number(e.target.value)})
-                  }
+                  value={isEditing ? (editingEmployee.RoleId ?? '') : (newEmployee.RoleId ?? '')}
+                  onChange={(e) => {
+                    const val = e.target.value === '' ? undefined : Number(e.target.value)
+                    if (isEditing) setEditingEmployee({...editingEmployee, RoleId: val})
+                    else setNewEmployee({...newEmployee, RoleId: val})
+                  }}
                 >
-                  <option value={0}>اختر صلاحية</option>
+                  <option value="">اختر صلاحية</option>
                   {Array.isArray(rolesList) && rolesList.map(r => (
                     <option key={r.id || r.Id} value={Number(r.id || r.Id)}>
                       {r.name || r.Name}
@@ -512,14 +513,14 @@ export default function EmployeeManagement() {
                 </label>
                 <select
                   className="input-field bg-background"
-                  value={isEditing ? (editingEmployee.SupervisorId || 0) : (newEmployee.SupervisorId || 0)}
+                  value={isEditing ? (editingEmployee.SupervisorId ?? '') : (newEmployee.SupervisorId ?? '')}
                   onChange={(e) => {
-                    const val = parseInt(e.target.value) || 0
+                    const val = e.target.value === '' ? undefined : Number(e.target.value)
                     if (isEditing) setEditingEmployee({ ...editingEmployee, SupervisorId: val })
                     else setNewEmployee({ ...newEmployee, SupervisorId: val })
                   }}
                 >
-                  <option value={0}>اختر مشرفاً</option>
+                  <option value="">اختر مشرفاً</option>
                   {Array.isArray(supervisorsList) && supervisorsList.map(u => (
                     <option key={(u.id ?? u.Id)} value={Number(u.id ?? u.Id)}>
                       {u.name || u.Name || u.userName || u.UserName}

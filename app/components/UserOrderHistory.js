@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth'
 
 export default function UserOrderHistory() {
   const { user } = useAuth()
-  const { myOrders, loading, error, fetchMyOrders } = useOrders()
+  const { myOrders, loading, fetchMyOrders } = useOrders()
   const [showHistory, setShowHistory] = useState(true)
 
   useEffect(() => {
@@ -19,7 +19,7 @@ export default function UserOrderHistory() {
   // Use the server-filtered list directly
   const userOrders = myOrders || []
   
-  console.log('UserOrderHistory render - user:', user?.id, 'myOrders:', myOrders, 'userOrders:', userOrders, 'loading:', loading, 'error:', error)
+  console.log('UserOrderHistory render - user:', user?.id, 'myOrders:', myOrders, 'userOrders:', userOrders, 'loading:', loading)
 
   const getStatusBadge = (status) => {
     const statusMap = {

@@ -27,17 +27,14 @@ export default function App() {
 
   // Always show loading while checking authentication or if user is null
   if (isLoading || !user) {
-    console.log('Showing loading or waiting for user...')
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">
+        {/* <div className="text-xl">
           {isLoading ? 'Loading...' : 'Checking authentication...'}
-        </div>
+        </div> */}
       </div>
     )
   }
 
-  // Show home page for authenticated users
-  console.log('Rendering HomePage with user:', user)
   return <HomePage />
 }
