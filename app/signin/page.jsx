@@ -122,7 +122,7 @@ export default function SignInPage() {
               {isLoggingIn ? 'Signing In...' : 'Sign In'}
             </button>
 
-            <div className="text-center">
+            {/* <div className="text-center">
               <button 
                 type="button" 
                 className="text-[#c1dadf] "
@@ -130,7 +130,7 @@ export default function SignInPage() {
               >
                 Don't have an account? Sign up
               </button>
-            </div>
+            </div> */}
           </form>
         </div>
       </div>
