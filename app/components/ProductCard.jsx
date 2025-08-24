@@ -5,7 +5,7 @@ import "@/app/globals.css"
 
 export default function ProductCard({ product }) {
   const { addToCart, openCartModal } = useCart()
-  const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
+  const ImagePath = "api/AppMedia/"
 
   const handleAddToCart = () => {
     addToCart(product)
