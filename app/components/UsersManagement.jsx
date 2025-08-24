@@ -230,22 +230,22 @@ export default function UsersManagement() {
               <table className="min-w-full divide-y divide-gray-700">
                 <thead className="bg-transparent">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">
                       <input type="checkbox" checked={allSelected} onChange={toggleSelectAll} />
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">ID</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Username</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Mobile</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Active</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Role</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">User Type</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Balance</th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Actions</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">ID</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Username</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Mobile</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Active</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Role</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">User Type</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Balance</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800">
-                  {Array.isArray(users) && users.length > 0 ? users.map(u => {
+                  {Array.isArray(users) && users.length > 0 ? users.map((u, index) => {
                     const id = u.id || u.Id
                     const isActive = (u.isActive != null ? u.isActive : u.IsActive)
                     // Check multiple possible field names for role
@@ -269,25 +269,29 @@ export default function UsersManagement() {
                     const userTypeId = (u.userType != null ? u.userType : u.UserType)
                     const userType = userTypeNameById.get(Number(userTypeId)) || userTypeId || '-'
                     const balance = (u.balance != null ? u.balance : (u.Balance != null ? u.Balance : balancesById[id]))
+                    
+                    // Alternate row colors
+                    const rowBgClass = index % 2 === 0 ? 'bg-background-content-1' : 'bg-background-content-1/50'
+                    
                     return (
-                      <tr key={id}>
-                        <td className="px-4 py-3 text-sm">
+                      <tr key={id} className={rowBgClass}>
+                        <td className="px-4 py-3 text-sm text-center">
                           <input type="checkbox" checked={selectedIds.includes(id)} onChange={() => toggleSelected(id)} />
                         </td>
-                        <td className="px-4 py-3 text-sm">{id}</td>
-                        <td className="px-4 py-3 text-sm">{u.name || u.Name}</td>
-                        <td className="px-4 py-3 text-sm">{u.userName || u.UserName}</td>
-                        <td className="px-4 py-3 text-sm">{u.mobile || u.Mobile || '-'}</td>
-                        <td className="px-4 py-3 text-sm">
+                        <td className="px-4 py-3 text-sm text-center">{id}</td>
+                        <td className="px-4 py-3 text-sm text-center">{u.name || u.Name}</td>
+                        <td className="px-4 py-3 text-sm text-center">{u.userName || u.UserName}</td>
+                        <td className="px-4 py-3 text-sm text-center">{u.mobile || u.Mobile || '-'}</td>
+                        <td className="px-4 py-3 text-sm text-center">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                             {String(isActive)}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-sm">{roleName}</td>
-                        <td className="px-4 py-3 text-sm">{userType}</td>
-                        <td className="px-4 py-3 text-sm">{balance ?? '-'}</td>
-                        <td className="px-4 py-3 text-sm">
-                          <div className="flex items-center gap-2">
+                        <td className="px-4 py-3 text-sm text-center">{roleName}</td>
+                        <td className="px-4 py-3 text-sm text-center">{userType}</td>
+                        <td className="px-4 py-3 text-sm text-center">{balance ?? '-'}</td>
+                        <td className="px-4 py-3 text-sm text-center">
+                          <div className="flex items-center justify-center gap-2">
                             <button className="btn-secondary" onClick={() => startEdit(u)}>Edit</button>
                             {/* <button className="btn-secondary" onClick={() => setPasswordForm({ id, password: '', rePassword: '' })}>Change Password</button> */}
                             <button className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg" onClick={() => deleteOne(id)}>Delete</button>

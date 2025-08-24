@@ -1,6 +1,6 @@
 // API utility functions for making HTTP requests
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://alameenapp.runasp.net/api'
+const API_BASE_URL = "/api"
 
 // Generic API request function
 const apiRequest = async (endpoint, options = {}) => {
@@ -23,25 +23,18 @@ const apiRequest = async (endpoint, options = {}) => {
     config.headers['Authorization'] = `Bearer ${token}`
   }
 
-  console.log('=== API REQUEST ===')
-  console.log('URL:', url)
-  console.log('Method:', config.method || 'GET')
-  console.log('Headers:', config.headers)
-  if (config.body) {
-    console.log('Body:', config.body)
-  }
+ 
+ 
 
   const response = await fetch(url, config)
   
-  console.log('=== API RESPONSE ===')
-  console.log('Status:', response.status)
-  console.log('Status Text:', response.statusText)
+
     
     if (!response.ok) {
     let errorMessage = `HTTP error! status: ${response.status}`
     try {
       const errorData = await response.text()
-      console.log('Error response body:', errorData)
+      
       if (errorData) {
         try {
           const parsedError = JSON.parse(errorData)
@@ -57,7 +50,7 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 
   const data = await response.json()
-  console.log('Response data:', data)
+  
   return data
 }
 
@@ -66,9 +59,7 @@ export const authAPI = {
   // Get authentication token
   getToken: async () => {
     try {
-      console.log('=== GET TOKEN API CALL START ===')
-      console.log('API URL:', `${API_BASE_URL}/Auth/GetToken`)
-      console.log('Note: This endpoint may require user authentication first')
+      
       
       const response = await fetch(`${API_BASE_URL}/Auth/GetToken`, {
         method: 'GET',
@@ -77,16 +68,13 @@ export const authAPI = {
         }
       })
 
-      console.log('=== GET TOKEN API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body:', errorData)
+          
           
           // Check if this is the specific authentication error
           if (errorData.includes('System.ArgumentException') || errorData.includes('IndexOutOfRangeException')) {
@@ -106,10 +94,7 @@ export const authAPI = {
       }
 
       const result = await response.json()
-      console.log('=== GET TOKEN SUCCESS ===')
-      console.log('Raw token response:', result)
-      console.log('Token response type:', typeof result)
-      console.log('Token response keys:', Object.keys(result))
+     
       
       // Handle different possible token response formats
       let tokenToStore = null
@@ -124,31 +109,24 @@ export const authAPI = {
       } else if (result.data && result.data.token) {
         tokenToStore = result.data.token
       } else {
-        console.warn('No token found in response, using full response as token')
         tokenToStore = JSON.stringify(result)
       }
       
-      console.log('Token to store:', tokenToStore)
       
       // Store token in localStorage
       if (tokenToStore) {
         localStorage.setItem('authToken', tokenToStore)
-        console.log('Token stored in localStorage')
       } else {
-        console.error('No token found in API response')
         throw new Error('No authentication token received from server')
       }
       
       return result
     } catch (error) {
-      console.error('=== GET TOKEN API ERROR ===')
-      console.error('Get token API error:', error)
+    
       
       // If it's the authentication error, provide helpful guidance
       if (error.message.includes('requires user authentication')) {
-        console.log('=== AUTHENTICATION GUIDANCE ===')
-        console.log('The GetToken endpoint requires a logged-in user session.')
-        console.log('Please login first using the sign-in form, then try accessing the admin dashboard.')
+        
       }
       
       throw error
@@ -158,8 +136,7 @@ export const authAPI = {
   // Login endpoint
   signIn: async (userName, password) => {
     try {
-      console.log('=== LOGIN API CALL START ===')
-      console.log('Input data:', { userName, password })
+    
       
       const response = await fetch(`${API_BASE_URL}/Auth/login`, {
       method: 'POST',
@@ -170,21 +147,18 @@ export const authAPI = {
       body: JSON.stringify({ userName, password })
     })
 
-      console.log('=== LOGIN API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
 
       if (!response.ok) {
-        console.log('=== LOGIN ERROR RESPONSE ===')
+       
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body (raw):', errorData)
+          
           if (errorData) {
             try {
               const parsedError = JSON.parse(errorData)
-              console.log('Error response body (parsed):', parsedError)
+              
               errorMessage = parsedError.message || parsedError.error || errorMessage
             } catch {
               errorMessage = errorData || errorMessage
@@ -193,18 +167,15 @@ export const authAPI = {
         } catch (e) {
           console.log('Could not read error response:', e)
         }
-        console.log('Final error message:', errorMessage)
+        
         throw new Error(errorMessage)
       }
 
       const result = await response.json()
-      console.log('=== LOGIN SUCCESS RESPONSE ===')
-      console.log('Login success response:', result)
-      console.log('=== LOGIN API CALL END ===')
+     
       return result
     } catch (error) {
-      console.error('=== LOGIN API ERROR ===')
-      console.error('Login API error:', error)
+     
       throw error
     }
   },
@@ -212,8 +183,7 @@ export const authAPI = {
   // Register endpoint
   signUp: async (userData) => {
     try {
-      console.log('=== REGISTRATION API CALL START ===')
-      console.log('Input userData:', userData)
+     
       
     // Create FormData for multipart/form-data
     const formData = new FormData()
@@ -241,15 +211,8 @@ export const authAPI = {
         formData.append('Profile', userData.profile)
       }
 
-      console.log('=== FORM DATA CONTENTS ===')
-      // Log the actual FormData contents
-      for (let [key, value] of formData.entries()) {
-        console.log(`FormData ${key}:`, value, `(Type: ${typeof value})`)
-      }
 
-      console.log('=== API REQUEST DETAILS ===')
-      console.log('URL:', `${API_BASE_URL}/Auth/register`)
-      console.log('Method: POST')
+
 
       // Add optional Authorization header if token exists (as in Swagger example)
       const token = localStorage.getItem('authToken')
@@ -266,22 +229,19 @@ export const authAPI = {
       body: formData
       })
 
-      console.log('=== API RESPONSE DETAILS ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()))
+
 
       if (!response.ok) {
-        console.log('=== ERROR RESPONSE ===')
+       
         // Try to get error details from response
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body (raw):', errorData)
+          
           if (errorData) {
             try {
               const parsedError = JSON.parse(errorData)
-              console.log('Error response body (parsed):', parsedError)
+              
               // Check for specific error messages
               if (parsedError.message && parsedError.message.includes('found')) {
                 if (parsedError.message.includes('email') || parsedError.message.includes('Email')) {
@@ -312,13 +272,10 @@ export const authAPI = {
       }
 
       const result = await response.json()
-      console.log('=== SUCCESS RESPONSE ===')
-      console.log('Registration success response:', result)
-      console.log('=== REGISTRATION API CALL END ===')
+     
       return result
     } catch (error) {
-      console.error('=== REGISTRATION API ERROR ===')
-      console.error('Registration API error:', error)
+     
       throw error
     }
   },
@@ -339,7 +296,7 @@ export const productsAPI = {
   // Get all products with pagination and filtering
   getAll: async (params = {}) => {
     try {
-      console.log('=== GET ALL PRODUCTS API CALL START ===')
+     
       
       const {
         pageNumber = 1, // Start from page 1 instead of 0
@@ -354,8 +311,7 @@ export const productsAPI = {
       } = params
 
       const url = `${API_BASE_URL}/Product`
-      console.log('Request URL:', url)
-      console.log('Request params:', params)
+
 
       // Get token from localStorage (from login)
       const token = localStorage.getItem('authToken')
@@ -398,8 +354,7 @@ export const productsAPI = {
         requestBody.pointsCost = pointsCost
       }
 
-      console.log('Request headers:', headers)
-      console.log('Request body:', requestBody)
+
 
       let response = await fetch(url, {
         method: 'POST',
@@ -425,15 +380,13 @@ export const productsAPI = {
         }
       }
 
-      console.log('=== GET ALL PRODUCTS API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body:', errorData)
+          
           if (errorData) {
             try {
               const parsedError = JSON.parse(errorData)
@@ -449,23 +402,19 @@ export const productsAPI = {
       }
 
       const result = await response.json()
-      console.log('=== GET ALL PRODUCTS SUCCESS ===')
-      console.log('Products response:', result)
       return result
     } catch (error) {
-      console.error('=== GET ALL PRODUCTS API ERROR ===')
-      console.error('Get all products API error:', error)
+     
       throw error
     }
   },
 
   getById: async (id) => {
     try {
-      console.log('=== GET PRODUCT BY ID API CALL START ===')
-      console.log('Product ID:', id)
+      
       
       const url = `${API_BASE_URL}/Product/${id}`
-      console.log('Request URL:', url)
+    
 
       // Get token from localStorage (from login)
       const token = localStorage.getItem('authToken')
@@ -479,7 +428,7 @@ export const productsAPI = {
         'Authorization': `Bearer ${token}`
       }
 
-      console.log('Request headers:', headers)
+
 
       let response = await fetch(url, {
         method: 'GET',
@@ -501,15 +450,13 @@ export const productsAPI = {
         } catch {}
       }
 
-      console.log('=== GET PRODUCT BY ID API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body:', errorData)
+          
           if (errorData) {
             try {
               const parsedError = JSON.parse(errorData)
@@ -525,12 +472,8 @@ export const productsAPI = {
       }
 
       const result = await response.json()
-      console.log('=== GET PRODUCT BY ID SUCCESS ===')
-      console.log('Product response:', result)
       return result
     } catch (error) {
-      console.error('=== GET PRODUCT BY ID API ERROR ===')
-      console.error('Get product by ID API error:', error)
       throw error
     }
   },
@@ -538,8 +481,7 @@ export const productsAPI = {
   // Create new product
   create: async (productData) => {
     try {
-      console.log('=== CREATE PRODUCT API CALL START ===')
-      console.log('Input productData:', productData)
+     
       
       // Get token from localStorage (from login)
       const token = localStorage.getItem('authToken')
@@ -559,10 +501,7 @@ export const productsAPI = {
       if (productData.path) formData.append('Path', productData.path)
       if (productData.file) formData.append('File', productData.file)
 
-      console.log('=== PRODUCT FORM DATA CONTENTS ===')
-      for (let [key, value] of formData.entries()) {
-        console.log(`FormData ${key}:`, value, `(Type: ${typeof value})`)
-      }
+
 
       const headers = {
         'lang': 'en'
@@ -593,9 +532,7 @@ export const productsAPI = {
         } catch {}
       }
 
-      console.log('=== CREATE PRODUCT API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
@@ -617,12 +554,8 @@ export const productsAPI = {
       }
 
       const result = await response.json()
-      console.log('=== CREATE PRODUCT SUCCESS ===')
-      console.log('Create product response:', result)
       return result
     } catch (error) {
-      console.error('=== CREATE PRODUCT API ERROR ===')
-      console.error('Create product API error:', error)
       throw error
     }
   },
@@ -630,9 +563,7 @@ export const productsAPI = {
   // Update existing product
   update: async (id, productData) => {
     try {
-      console.log('=== UPDATE PRODUCT API CALL START ===')
-      console.log('Product ID:', id)
-      console.log('Input productData:', productData)
+     
       
       // Get token from localStorage (from login)
       const token = localStorage.getItem('authToken')
@@ -652,10 +583,7 @@ export const productsAPI = {
       if (productData.path) formData.append('Path', productData.path)
       if (productData.file) formData.append('File', productData.file)
 
-      console.log('=== UPDATE PRODUCT FORM DATA CONTENTS ===')
-      for (let [key, value] of formData.entries()) {
-        console.log(`FormData ${key}:`, value, `(Type: ${typeof value})`)
-      }
+
 
       const headers = {
         'lang': 'en'
@@ -686,15 +614,13 @@ export const productsAPI = {
         } catch {}
       }
 
-      console.log('=== UPDATE PRODUCT API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
           const errorData = await response.text()
-          console.log('Error response body:', errorData)
+          
           if (errorData) {
             try {
               const parsedError = JSON.parse(errorData)
@@ -710,20 +636,15 @@ export const productsAPI = {
       }
 
       const result = await response.json()
-      console.log('=== UPDATE PRODUCT SUCCESS ===')
-      console.log('Update product response:', result)
       return result
     } catch (error) {
-      console.error('=== UPDATE PRODUCT API ERROR ===')
-      console.error('Update product API error:', error)
       throw error
     }
   },
 
   delete: async (id) => {
     try {
-      console.log('=== DELETE PRODUCT API CALL START ===')
-      console.log('Product ID to delete:', id)
+     
       
       // Get token from localStorage (from login)
       const token = localStorage.getItem('authToken')
@@ -758,9 +679,7 @@ export const productsAPI = {
         } catch {}
       }
 
-      console.log('=== DELETE PRODUCT API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
+
 
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
@@ -782,12 +701,8 @@ export const productsAPI = {
       }
 
       const result = await response.json()
-      console.log('=== DELETE PRODUCT SUCCESS ===')
-      console.log('Delete product response:', result)
       return result
     } catch (error) {
-      console.error('=== DELETE PRODUCT API ERROR ===')
-      console.error('Delete product API error:', error)
       throw error
     }
   }
@@ -885,9 +800,7 @@ export const ordersAPI = {
       }
     }
     
-    console.log('Orders API Request Body:', body)
-    console.log('Orders API Request URL:', url)
-    console.log('Orders API Request Headers:', headers)
+    
     
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
     if (response.status === 401) {
@@ -902,8 +815,6 @@ export const ordersAPI = {
     }
     if (!response.ok) {
       const text = await response.text()
-      console.error('Orders API Error Response:', text)
-      console.error('Orders API Error Status:', response.status)
       throw new Error(text || `Failed to load orders: ${response.status}`)
     }
     return await response.json()
@@ -999,9 +910,7 @@ export const ordersAPI = {
       }
     }
     
-    console.log('Pending Orders API Request Body:', body)
-    console.log('Pending Orders API Request URL:', url)
-    console.log('Pending Orders API Request Headers:', headers)
+    
     
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
     if (response.status === 401) {
@@ -1016,8 +925,6 @@ export const ordersAPI = {
     }
     if (!response.ok) {
       const text = await response.text()
-      console.error('Pending Orders API Error Response:', text)
-      console.error('Pending Orders API Error Status:', response.status)
       throw new Error(text || `Failed to load pending orders: ${response.status}`)
     }
     return await response.json()
@@ -1082,11 +989,7 @@ export const ordersAPI = {
       `${API_BASE_URL}/UserRequest/RegisterRecharge`
     ]
     
-    console.log('=== REGISTER RECHARGE REQUEST ===')
-    console.log('🔗 Primary URL (from API spec):', primaryUrl)
-    console.log('🔗 Alternative URLs:', altUrls)
-    console.log('📤 Request data:', data)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
+    
     
     const formData = new FormData()
     if (data.Id) formData.append('Id', data.Id.toString())
@@ -1119,13 +1022,10 @@ export const ordersAPI = {
     
     let response = await doAttempt(primaryUrl)
     if (!response.ok) {
-      console.log('⚠️ Primary URL failed, trying alternatives...')
       for (const u of altUrls) {
         try {
-          console.log('🔄 Trying alternative URL:', u)
           response = await doAttempt(u)
           if (response.ok) {
-            console.log('✅ Alternative URL succeeded:', u)
             break
           }
         } catch {}
@@ -1134,39 +1034,20 @@ export const ordersAPI = {
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Error response:', text)
-      console.error('❌ Error status:', response.status)
-      console.error('❌ Full response:', response)
-      
       // Try to get more details about the error
       if (response.status === 405) {
-        console.error('Recharge API - 405 Method Not Allowed. This usually means:')
-        console.error('1. Wrong HTTP method (POST vs PUT vs GET)')
-        console.error('2. Wrong endpoint URL')
-        console.error('3. Missing required headers')
-        console.error('4. Backend endpoint not implemented')
+       
       }
       
       throw new Error(text || `Failed to register recharge request: ${response.status}`)
     }
     
     const responseData = await response.json()
-    console.log('✅ Response data:', responseData)
-    console.log('📊 Response structure analysis:', {
-      hasData: !!responseData.data,
-      hasItems: !!responseData.items,
-      hasSuccess: !!responseData.success,
-      dataType: typeof responseData.data,
-      itemsType: typeof responseData.items,
-      keys: Object.keys(responseData),
-      isArray: Array.isArray(responseData),
-      isObject: typeof responseData === 'object' && responseData !== null
-    })
+   
     
     // Since the API returns data: null, we need to construct a mock order object
     // This is a workaround until the backend is fixed to return the actual order data
     if (responseData.success && responseData.data === null) {
-      console.log('⚠️ API returned success but data is null. Creating mock order object.')
       
       // Get current user info to construct the order
       const userDataStr = typeof window !== 'undefined' ? localStorage.getItem('userData') : null
@@ -1224,13 +1105,11 @@ export const ordersAPI = {
 
   editRecharge: async (id, data) => {
     // Edit existing recharge: PUT /api/UserRequest/EditRechargeReuest/{id}
-    console.log('=== EDIT RECHARGE API CALL ===')
-    console.log('ID:', id)
-    console.log('Data:', data)
+   
     
     const token = localStorage.getItem('authToken')
     if (!token) {
-      console.error('No authentication token found')
+     
       throw new Error('No authentication token found. Please sign in first.')
     }
     
@@ -1245,8 +1124,7 @@ export const ordersAPI = {
       `${API_BASE_URL}/UserRequest/editRecharge/${id}`
     ]
     
-    console.log('Primary URL:', primaryUrl)
-    console.log('Alternative URLs:', altUrls)
+   
     
     const formData = new FormData()
     // Always append all fields, using empty value when not provided (matches Swagger UI)
@@ -1260,32 +1138,25 @@ export const ordersAPI = {
       formData.append('TransferImage', '')
     }
     
-    console.log('FormData entries:')
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${value}`)
-    }
+    
     
     const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
-    console.log('Headers:', headers)
-    
+
     const doAttempt = async (attemptUrl, method = 'PUT') => {
-      console.log(`🔄 Trying ${method} ${attemptUrl}`)
+     
       let resp = await fetch(attemptUrl, { method, headers, body: formData })
-      console.log(`📡 Response status: ${resp.status}`)
       
       if (resp.status === 401) {
-      console.log('Unauthorized, attempting token refresh...')
+      
       try {
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshedToken}` }
-          console.log('Retrying with refreshed token...')
             resp = await fetch(attemptUrl, { method, headers: retryHeaders, body: formData })
-            console.log(`Retry response status: ${resp.status}`)
         }
       } catch (refreshError) {
-        console.error('Token refresh failed:', refreshError)
+       
       }
       }
       return resp
@@ -1296,26 +1167,26 @@ export const ordersAPI = {
     
     // If PUT fails, try POST as fallback
     if (!response.ok) {
-      console.log('⚠️ PUT failed, trying POST...')
+     
       response = await doAttempt(primaryUrl, 'POST')
     }
     
     // If still fails, try alternative URLs with both methods
     if (!response.ok) {
-      console.log('⚠️ Primary URL failed, trying alternatives...')
+     
       for (const altUrl of altUrls) {
         try {
           // Try PUT first
           response = await doAttempt(altUrl, 'PUT')
           if (response.ok) {
-            console.log('✅ Alternative URL succeeded with PUT:', altUrl)
+           
             break
           }
           
           // Try POST as fallback
           response = await doAttempt(altUrl, 'POST')
           if (response.ok) {
-            console.log('✅ Alternative URL succeeded with POST:', altUrl)
+           
             break
           }
         } catch (err) {
@@ -1326,9 +1197,7 @@ export const ordersAPI = {
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ All edit recharge attempts failed')
-      console.error('❌ Final response status:', response.status)
-      console.error('❌ Response text:', text)
+     
       
       // Provide more specific error messages
       if (response.status === 405) {
@@ -1347,7 +1216,7 @@ export const ordersAPI = {
     }
     
     const responseData = await response.json()
-    console.log('✅ Edit recharge successful:', responseData)
+   
     return responseData
   },
 
@@ -1377,8 +1246,7 @@ export const ordersAPI = {
       apiPayload.Notes = String(data.notes ?? data.Notes)
     }
 
-    console.log('=== REGISTER PRODUCT REQUEST ===')
-    console.log('📤 API payload:', apiPayload)
+
 
     const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
 
@@ -1408,7 +1276,7 @@ export const ordersAPI = {
     }
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Product request error:', text || response.status)
+     
       throw new Error(text || `Failed to register product request: ${response.status}`)
     }
 
@@ -1416,13 +1284,11 @@ export const ordersAPI = {
   },
 
   editProductRequest: async (id, data) => {
-    console.log('=== EDIT PRODUCT REQUEST API CALL ===')
-    console.log('ID:', id)
-    console.log('Data:', data)
+   
     
     const token = localStorage.getItem('authToken')
     if (!token) {
-      console.error('No authentication token found')
+     
       throw new Error('No authentication token found. Please sign in first.')
     }
     
@@ -1437,17 +1303,11 @@ export const ordersAPI = {
       `${API_BASE_URL}/UserRequest/${id}` // Generic update endpoint
     ]
     
-    console.log('Primary URL:', primaryUrl)
-    console.log('Alternative URLs:', altUrls)
         
         const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
-        console.log('Headers:', headers)
-        console.log('Request body:', JSON.stringify(data))
         
     const doAttempt = async (attemptUrl, method = 'PUT') => {
-      console.log(`🔄 Trying ${method} ${attemptUrl}`)
       let resp = await fetch(attemptUrl, { method, headers, body: JSON.stringify(data) })
-      console.log(`📡 Response status: ${resp.status}`)
       
       if (resp.status === 401) {
           try {
@@ -1456,7 +1316,7 @@ export const ordersAPI = {
             if (refreshedToken) {
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshedToken}` }
             resp = await fetch(attemptUrl, { method, headers: retryHeaders, body: JSON.stringify(data) })
-            console.log(`Retry response status: ${resp.status}`)
+           
           }
         } catch {}
       }
@@ -1468,26 +1328,26 @@ export const ordersAPI = {
     
     // If PUT fails, try POST as fallback
     if (!response.ok) {
-      console.log('⚠️ PUT failed, trying POST...')
+     
       response = await doAttempt(primaryUrl, 'POST')
     }
     
     // If still fails, try alternative URLs with both methods
     if (!response.ok) {
-      console.log('⚠️ Primary URL failed, trying alternatives...')
+     
       for (const altUrl of altUrls) {
         try {
           // Try PUT first
           response = await doAttempt(altUrl, 'PUT')
         if (response.ok) {
-            console.log('✅ Alternative URL succeeded with PUT:', altUrl)
+           
             break
           }
           
           // Try POST as fallback
           response = await doAttempt(altUrl, 'POST')
           if (response.ok) {
-            console.log('✅ Alternative URL succeeded with POST:', altUrl)
+           
             break
           }
         } catch (err) {
@@ -1498,9 +1358,7 @@ export const ordersAPI = {
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ All edit product request attempts failed')
-      console.error('❌ Final response status:', response.status)
-      console.error('❌ Response text:', text)
+     
       
       // Provide more specific error messages
       if (response.status === 405) {
@@ -1519,7 +1377,7 @@ export const ordersAPI = {
     }
     
     const responseData = await response.json()
-    console.log('✅ Edit product request successful:', responseData)
+   
     return responseData
   },
 
@@ -1530,27 +1388,24 @@ export const ordersAPI = {
     // According to the API spec, the correct endpoint is ApproveRequest/{id}
     const url = `${API_BASE_URL}/UserRequest/ApproveRequest/${id}`
     
-    console.log('=== APPROVE REQUEST ===')
-    console.log('🔗 URL (from API spec):', url)
-    console.log('📋 Order ID:', id)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
+    
     
     const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
     
     const doAttempt = async (method = 'PUT') => {
-      console.log(`🔄 Trying ${method} ${url}`)
+     
       let resp = await fetch(url, { method, headers })
-      console.log(`📡 Response status: ${resp.status}`)
+     
       
       if (resp.status === 401) {
         try {
-          console.log('🔄 Token expired, attempting refresh...')
+         
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshedToken}` }
             resp = await fetch(url, { method, headers: retryHeaders })
-            console.log(`🔄 Retry response status: ${resp.status}`)
+           
         }
       } catch {}
     }
@@ -1562,15 +1417,13 @@ export const ordersAPI = {
     
     // If PUT fails, try POST as fallback (some APIs support both)
     if (!response.ok) {
-      console.log('⚠️ PUT failed, trying POST...')
+     
       response = await doAttempt('POST')
     }
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Approve failed')
-      console.error('❌ Response status:', response.status)
-      console.error('❌ Response text:', text)
+      
       
       // Friendly message for EF async provider issue
       if (text && text.includes('IDbAsyncQueryProvider')) {
@@ -1592,13 +1445,11 @@ export const ordersAPI = {
     }
     
     const responseData = await response.json()
-    console.log('✅ Approve response received:', responseData)
+   
     
     // Check if the API returned success: false even with 200 status
     if (responseData && responseData.success === false) {
-      console.error('❌ API returned success: false with error message')
-      console.error('❌ Error message:', responseData.message)
-      console.error('❌ Status code:', responseData.statusCode)
+     
       
       // Handle specific business logic errors
       if (responseData.message && responseData.message.includes('balance')) {
@@ -1614,7 +1465,7 @@ export const ordersAPI = {
       }
     }
     
-    console.log('✅ Approve successful:', responseData)
+    
     return responseData
   },
 
@@ -1625,27 +1476,24 @@ export const ordersAPI = {
     // According to the API spec, the correct endpoint is RejectRequest/{id}
     const url = `${API_BASE_URL}/UserRequest/RejectRequest/${id}`
     
-    console.log('=== REJECT REQUEST ===')
-    console.log('🔗 URL (from API spec):', url)
-    console.log('📋 Order ID:', id)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
+    
     
     const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
     
     const doAttempt = async (method = 'PUT') => {
-      console.log(`🔄 Trying ${method} ${url}`)
+     
       let resp = await fetch(url, { method, headers })
-      console.log(`📡 Response status: ${resp.status}`)
+     
       
       if (resp.status === 401) {
         try {
-          console.log('🔄 Token expired, attempting refresh...')
+         
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
             const retryHeaders = { ...headers, Authorization: `Bearer ${refreshedToken}` }
             resp = await fetch(url, { method, headers: retryHeaders })
-            console.log(`🔄 Retry response status: ${resp.status}`)
+           
         }
       } catch {}
     }
@@ -1657,15 +1505,13 @@ export const ordersAPI = {
     
     // If PUT fails, try POST as fallback (some APIs support both)
     if (!response.ok) {
-      console.log('⚠️ PUT failed, trying POST...')
+     
       response = await doAttempt('POST')
     }
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Reject failed')
-      console.error('❌ Response status:', response.status)
-      console.error('❌ Response text:', text)
+     
       
       // Provide more specific error messages
       if (response.status === 404) {
@@ -1682,13 +1528,11 @@ export const ordersAPI = {
     }
     
     const responseData = await response.json()
-    console.log('✅ Reject response received:', responseData)
+   
     
     // Check if the API returned success: false even with 200 status
     if (responseData && responseData.success === false) {
-      console.error('❌ API returned success: false with error message')
-      console.error('❌ Error message:', responseData.message)
-      console.error('❌ Status code:', responseData.statusCode)
+     
       
       // Handle specific business logic errors
       if (responseData.message && responseData.message.includes('permission')) {
@@ -1702,7 +1546,7 @@ export const ordersAPI = {
       }
     }
     
-    console.log('✅ Reject successful:', responseData)
+   
     return responseData
   },
 
@@ -1731,47 +1575,30 @@ export const ordersAPI = {
       }
     }
 
-    console.log('=== GET MY REQUESTS API ===')
-    console.log('🔗 URL:', url)
-    console.log('📤 Request body:', body)
-    console.log('📋 Headers:', headers)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
     
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-    console.log('📡 Response status:', response.status)
-    console.log('📋 Response headers:', response.headers)
+    
     
     if (response.status === 401) {
       try {
-        console.log('🔄 Token expired, attempting refresh...')
+        
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
           headers['Authorization'] = `Bearer ${refreshedToken}`
           response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-          console.log('🔄 Retry response status:', response.status)
+          
         }
       } catch {}
     }
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Error response:', text)
-      console.error('❌ Error status:', response.status)
+     
       throw new Error(text || `Failed to load my requests: ${response.status}`)
     }
     
     const responseData = await response.json()
-    console.log('✅ Response data:', responseData)
-    console.log('📊 Data length:', responseData.data?.length || 0)
-    console.log('📊 Total items:', responseData.totalItems || 0)
-    console.log('📊 Response structure:', {
-      hasData: !!responseData.data,
-      hasItems: !!responseData.items,
-      hasSuccess: !!responseData.success,
-      dataType: typeof responseData.data,
-      itemsType: typeof responseData.items,
-      keys: Object.keys(responseData)
-    })
+   
     return responseData
   },
 
@@ -1805,15 +1632,7 @@ export const ordersAPI = {
     const userDataStr = typeof window !== 'undefined' ? localStorage.getItem('userData') : null
     const currentUser = userDataStr ? JSON.parse(userDataStr) : null
     
-    console.log('🔍 User analysis in API call:', {
-      userId: currentUser?.id,
-      userType: currentUser?.userType,
-      userTypeName: currentUser?.userTypeName,
-      userBalance: currentUser?.balance,
-      isEmployee: currentUser?.userType === 2 || currentUser?.userTypeName?.toLowerCase().includes('employee'),
-      isAdmin: currentUser?.userType === 10 || currentUser?.userTypeName === 'System',
-      userData: currentUser
-    })
+    
     
     // Handle different user types
     if (currentUser?.id) {
@@ -1821,47 +1640,40 @@ export const ordersAPI = {
         // For employees, try both forUserId and requestedByUserId
         body.forUserId = currentUser.id.toString()
         body.requestedByUserId = currentUser.id.toString()
-        console.log('🔍 Employee detected - using both forUserId and requestedByUserId')
+        
       } else {
         // For regular users, use forUserId
         body.forUserId = currentUser.id.toString()
-        console.log('🔍 Regular user - using forUserId only')
+        
       }
     }
     
     // Try to get all requests without type filter first
-    console.log('🔍 Attempting to get all requests without type restriction...')
 
-    console.log('=== GET ALL MY REQUESTS (GENERIC) ===')
-    console.log('🔗 URL:', url)
-    console.log('📤 Request body:', body)
-    console.log('📋 Headers:', headers)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
     
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-    console.log('📡 Response status:', response.status)
+
     
     if (response.status === 401) {
       try {
-        console.log('🔄 Token expired, attempting refresh...')
+        
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
           headers['Authorization'] = `Bearer ${refreshedToken}`
           response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-          console.log('🔄 Retry response status:', response.status)
+          
         }
       } catch {}
     }
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Error response:', text)
-      console.error('❌ Error status:', response.status)
+     
       
       // For employees, try alternative approach
       if (currentUser?.userType === 2 || currentUser?.userTypeName?.toLowerCase().includes('employee')) {
-        console.log('🔄 Employee detected - trying alternative approach without user filters...')
+        
         try {
           const altBody = { ...body }
           delete altBody.forUserId
@@ -1870,7 +1682,7 @@ export const ordersAPI = {
           const altResponse = await fetch(url, { method: 'POST', headers, body: JSON.stringify(altBody) })
           if (altResponse.ok) {
             const altData = await altResponse.json()
-            console.log('✅ Alternative approach successful:', altData)
+            
             return altData
           }
         } catch (altError) {
@@ -1882,17 +1694,7 @@ export const ordersAPI = {
     }
     
     const responseData = await response.json()
-    console.log('✅ All requests response data:', responseData)
-    console.log('📊 All requests data length:', responseData.data?.length || 0)
-    console.log('📊 All requests total items:', responseData.totalItems || 0)
-    console.log('📊 All requests structure:', {
-      hasData: !!responseData.data,
-      hasItems: !!responseData.items,
-      hasSuccess: !!responseData.success,
-      dataType: typeof responseData.data,
-      itemsType: typeof responseData.items,
-      keys: Object.keys(responseData)
-    })
+   
     return responseData
   },
 
@@ -1901,11 +1703,10 @@ export const ordersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
 
-    console.log('🔄 Trying multiple approaches to get recharge requests...')
     
     // Approach 1: Try the generic endpoint with type 2 (recharge)
     try {
-      console.log('🔄 Approach 1: Generic endpoint with type 2...')
+     
       const url1 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
@@ -1919,13 +1720,12 @@ export const ordersAPI = {
         type: 2 // Recharge type
       }
       
-      console.log('🔗 URL 1:', url1)
-      console.log('📤 Body 1:', body1)
+    
       
       let response1 = await fetch(url1, { method: 'POST', headers, body: JSON.stringify(body1) })
       if (response1.ok) {
         const data1 = await response1.json()
-        console.log('✅ Approach 1 successful:', data1)
+        
         if (data1?.data && data1.data.length > 0) {
           return data1
         }
@@ -1936,7 +1736,7 @@ export const ordersAPI = {
     
     // Approach 2: Try without type filter
     try {
-      console.log('🔄 Approach 2: Generic endpoint without type filter...')
+     
       const url2 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
@@ -1950,13 +1750,12 @@ export const ordersAPI = {
         // No type filter
       }
       
-      console.log('🔗 URL 2:', url2)
-      console.log('📤 Body 2:', body2)
+    
       
       let response2 = await fetch(url2, { method: 'POST', headers, body: JSON.stringify(body2) })
       if (response2.ok) {
         const data2 = await response2.json()
-        console.log('✅ Approach 2 successful:', data2)
+        
         if (data2?.data && data2.data.length > 0) {
           // Filter for recharge requests in the response
           const rechargeOnly = {
@@ -1980,7 +1779,7 @@ export const ordersAPI = {
     
     // Approach 3: Try the original GetMyRequests endpoint
     try {
-      console.log('🔄 Approach 3: Original GetMyRequests endpoint...')
+      
       const url3 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
@@ -1993,20 +1792,19 @@ export const ordersAPI = {
         pageSize: Math.max(1, Math.min(100, parseInt(params.pageSize) || 10))
       }
       
-      console.log('🔗 URL 3:', url3)
-      console.log('📤 Body 3:', body3)
+    
       
       let response3 = await fetch(url3, { method: 'POST', headers, body: JSON.stringify(body3) })
       if (response3.ok) {
         const data3 = await response3.json()
-        console.log('✅ Approach 3 successful:', data3)
+        
         return data3
       }
     } catch (e) {
       console.log('❌ Approach 3 failed:', e.message)
     }
     
-    console.log('❌ All approaches failed')
+    
     return { data: [], success: false, message: 'All approaches failed' }
   },
 
@@ -2036,41 +1834,32 @@ export const ordersAPI = {
       body.forUserId = currentUser.id.toString()
     }
 
-    console.log('=== GET RECHARGE REQUESTS FOR ZERO BALANCE ===')
-    console.log('🔗 URL:', url)
-    console.log('📤 Request body:', body)
-    console.log('🔍 User info:', {
-      userId: currentUser?.id,
-      userBalance: currentUser?.balance,
-      userData: currentUser
-    })
+   
     
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-    console.log('📡 Response status:', response.status)
+   
     
     if (response.status === 401) {
       try {
-        console.log('🔄 Token expired, attempting refresh...')
+        
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
           headers['Authorization'] = `Bearer ${refreshedToken}`
           response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
-          console.log('🔄 Retry response status:', response.status)
+          
         }
       } catch {}
     }
     
     if (!response.ok) {
       const text = await response.text()
-      console.error('❌ Error response:', text)
-      console.error('❌ Error status:', response.status)
+     
       throw new Error(text || `Failed to load recharge requests: ${response.status}`)
     }
     
     const responseData = await response.json()
-    console.log('✅ Recharge requests response data:', responseData)
-    console.log('📊 Recharge requests data length:', responseData.data?.length || 0)
+   
     return responseData
   }
 }
@@ -2182,16 +1971,14 @@ export const employeesAPI = {
       throw new Error('No authentication token found. Please sign in first.')
     }
 
-    console.log('=== EMPLOYEE REGISTRATION API ===')
-    console.log('📤 Employee data:', employeeData)
-    console.log('🔑 Token (first 20 chars):', token.substring(0, 20) + '...')
+
 
     const formData = new FormData()
     Object.keys(employeeData).forEach(key => {
       const value = employeeData[key]
       if (value !== undefined && value !== null && value !== '') {
         formData.append(key, value)
-        console.log(`📋 FormData: ${key} =`, value)
+        
       }
     })
 
@@ -2200,8 +1987,7 @@ export const employeesAPI = {
       'Authorization': `Bearer ${token}`
     }
 
-    console.log('📋 Headers:', headers)
-    console.log('🔗 URL:', `${API_BASE_URL}/Employee/register`)
+
 
     let response = await fetch(`${API_BASE_URL}/Employee/register`, {
       method: 'POST',
@@ -2209,8 +1995,7 @@ export const employeesAPI = {
       body: formData
     })
     
-    console.log('📡 Response status:', response.status)
-    console.log('📋 Response headers:', response.headers)
+
     
     if (response.status === 401) {
       try {
@@ -2230,13 +2015,12 @@ export const employeesAPI = {
     }
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Error response:', errorText)
-      console.error('❌ Error status:', response.status)
+     
       throw new Error(errorText || `Failed to register employee: ${response.status}`)
     }
     
     const responseData = await response.json()
-    console.log('✅ Response data:', responseData)
+    
     return responseData
   },
 
@@ -2246,10 +2030,7 @@ export const employeesAPI = {
       throw new Error('No authentication token found. Please sign in first.')
     }
     
-    console.log('=== UPDATE EMPLOYEE API CALL START ===')
-    console.log('Employee ID:', id)
-    console.log('Update data:', employeeData)
-
+   
     const formData = new FormData()
     formData.append('Id', id.toString())
     Object.keys(employeeData).forEach(key => {
@@ -2259,10 +2040,7 @@ export const employeesAPI = {
       }
     })
     
-    console.log('=== FORM DATA CONTENTS ===')
-    for (let [key, value] of formData.entries()) {
-      console.log(`FormData ${key}:`, value, `(Type: ${typeof value})`)
-    }
+   
 
     const headers = {
       'lang': 'en',
@@ -2732,10 +2510,6 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     
-    console.log('=== UPDATE USER API CALL START ===')
-    console.log('User ID:', id)
-    console.log('Update data:', data)
-    
     // Build query string for scalar fields
     const query = new URLSearchParams()
     if (data.Name) query.set('Name', data.Name)
@@ -2845,10 +2619,8 @@ export const usersAPI = {
 export const pointConversionAPI = {
   getAll: async () => {
     try {
-      console.log('=== GET ALL POINT CONVERSION SETTINGS API CALL START ===')
       
       const url = `${API_BASE_URL}/PointConversionSetting`
-      console.log('Request URL:', url)
 
       // Get token from localStorage
       const token = localStorage.getItem('authToken')
@@ -2884,10 +2656,6 @@ export const pointConversionAPI = {
         } catch {}
       }
 
-      console.log('=== GET ALL POINT CONVERSION SETTINGS API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
@@ -2908,23 +2676,17 @@ export const pointConversionAPI = {
       }
 
       const result = await response.json()
-      console.log('=== GET ALL POINT CONVERSION SETTINGS SUCCESS ===')
-      console.log('Point conversion settings response:', result)
       // Normalize to either array or object as returned by server
       return result
     } catch (error) {
-      console.error('=== GET ALL POINT CONVERSION SETTINGS API ERROR ===')
-      console.error('Get all point conversion settings API error:', error)
       throw error
     }
   },
 
   getById: async (id) => {
     try {
-      console.log('=== GET POINT CONVERSION SETTING BY ID API CALL START ===')
       
       const url = `${API_BASE_URL}/PointConversionSetting/${id}`
-      console.log('Request URL:', url)
 
       // Get token from localStorage
       const token = localStorage.getItem('authToken')
@@ -2959,10 +2721,6 @@ export const pointConversionAPI = {
         } catch {}
       }
 
-      console.log('=== GET POINT CONVERSION SETTING BY ID API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
@@ -2983,23 +2741,16 @@ export const pointConversionAPI = {
       }
 
       const result = await response.json()
-      console.log('=== GET POINT CONVERSION SETTING BY ID SUCCESS ===')
-      console.log('Point conversion setting response:', result)
       return result
     } catch (error) {
-      console.error('=== GET POINT CONVERSION SETTING BY ID API ERROR ===')
-      console.error('Get point conversion setting by ID API error:', error)
       throw error
     }
   },
 
   update: async (id, data) => {
     try {
-      console.log('=== UPDATE POINT CONVERSION SETTING API CALL START ===')
       
       const url = `${API_BASE_URL}/PointConversionSetting/Edit/${id}`
-      console.log('Request URL:', url)
-      console.log('Request data:', data)
 
       // Get token from localStorage
       const token = localStorage.getItem('authToken')
@@ -3036,10 +2787,6 @@ export const pointConversionAPI = {
         } catch {}
       }
 
-      console.log('=== UPDATE POINT CONVERSION SETTING API RESPONSE ===')
-      console.log('Response status:', response.status)
-      console.log('Response status text:', response.statusText)
-
       if (!response.ok) {
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
@@ -3060,12 +2807,8 @@ export const pointConversionAPI = {
       }
 
       const result = await response.json()
-      console.log('=== UPDATE POINT CONVERSION SETTING SUCCESS ===')
-      console.log('Update point conversion setting response:', result)
       return result
     } catch (error) {
-      console.error('=== UPDATE POINT CONVERSION SETTING API ERROR ===')
-      console.error('Update point conversion setting API error:', error)
       throw error
     }
   }
@@ -3076,8 +2819,6 @@ export const notificationAPI = {
   getAll: async (params = {}) => {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
-    
-    console.log('📧 Getting all notifications with params:', params)
     
     const url = `${API_BASE_URL}/Notification`
     const headers = {
@@ -3094,10 +2835,6 @@ export const notificationAPI = {
       sortType: params.sortType || ''
     }
     
-    console.log('📧 POST request to:', url)
-    console.log('📧 Request body:', body)
-    console.log('📧 Headers:', headers)
-    
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
     if (response.status === 401) {
       try {
@@ -3112,20 +2849,16 @@ export const notificationAPI = {
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Failed to get all notifications:', errorText)
       throw new Error(errorText || `Failed to load notifications: ${response.status}`)
     }
     
     const result = await response.json()
-    console.log('✅ All notifications response:', result)
     return result
   },
 
   getUserNotifications: async () => {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
-    
-    console.log('📧 Getting user notifications...')
     
     const url = `${API_BASE_URL}/Notification/GetUserNotifications`
     const headers = {
@@ -3150,12 +2883,10 @@ export const notificationAPI = {
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Failed to get user notifications:', errorText)
       throw new Error(errorText || `Failed to load user notifications: ${response.status}`)
     }
     
     const result = await response.json()
-    console.log('✅ User notifications response:', result)
     return result
   },
 
@@ -3163,16 +2894,11 @@ export const notificationAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     
-    console.log('📧 Marking notification as read:', notificationId)
-    
     const url = `${API_BASE_URL}/Notification/MarkAsRead/${notificationId}`
     const headers = {
       'lang': 'en',
       'Authorization': `Bearer ${token}`
     }
-    
-    console.log('📧 PUT request to:', url)
-    console.log('📧 Headers:', headers)
     
     let response = await fetch(url, { method: 'PUT', headers })
     if (response.status === 401) {
@@ -3188,26 +2914,20 @@ export const notificationAPI = {
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Failed to mark notification as read:', errorText)
       throw new Error(errorText || `Failed to mark notification as read: ${response.status}`)
     }
     
     // Check if response has content before trying to parse JSON
     const responseText = await response.text()
-    console.log('📧 Raw response text:', responseText)
     
     if (!responseText || responseText.trim() === '') {
-      console.log('✅ Mark as read successful (empty response)')
       return { success: true, message: 'Notification marked as read successfully' }
     }
     
     try {
       const result = JSON.parse(responseText)
-      console.log('✅ Mark as read response:', result)
       return result
     } catch (parseError) {
-      console.error('❌ Failed to parse JSON response:', parseError)
-      console.log('📧 Response text was:', responseText)
       return { success: true, message: 'Notification marked as read successfully' }
     }
   },
@@ -3224,9 +2944,6 @@ export const notificationAPI = {
       'Authorization': `Bearer ${token}`
     }
     
-    console.log('📧 PUT request to:', url)
-    console.log('📧 Headers:', headers)
-    
     let response = await fetch(url, { method: 'PUT', headers })
     if (response.status === 401) {
       try {
@@ -3241,26 +2958,20 @@ export const notificationAPI = {
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Failed to mark all notifications as read:', errorText)
       throw new Error(errorText || `Failed to mark all notifications as read: ${response.status}`)
     }
     
     // Check if response has content before trying to parse JSON
     const responseText = await response.text()
-    console.log('📧 Raw response text:', responseText)
     
     if (!responseText || responseText.trim() === '') {
-      console.log('✅ Mark all as read successful (empty response)')
       return { success: true, message: 'All notifications marked as read successfully' }
     }
     
     try {
       const result = JSON.parse(responseText)
-      console.log('✅ Mark all as read response:', result)
       return result
     } catch (parseError) {
-      console.error('❌ Failed to parse JSON response:', parseError)
-      console.log('📧 Response text was:', responseText)
       return { success: true, message: 'All notifications marked as read successfully' }
     }
   },
@@ -3269,13 +2980,9 @@ export const notificationAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     
-    console.log('📧 Creating notification with data:', notificationData)
-    
     // Based on the Swagger response, the notification system works differently
     // The API returns { "approvals": [], "tasks": [] } structure
     // This suggests notifications are managed through the approval/task system
-    
-    console.log('📧 Using the correct notification API structure based on Swagger docs')
     
     const url = `${API_BASE_URL}/Notification`
     const headers = {
@@ -3293,8 +3000,6 @@ export const notificationAPI = {
       sortType: 'desc'
     }
     
-    console.log('📧 POST request to /Notification with body:', body)
-    
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
     if (response.status === 401) {
       try {
@@ -3309,18 +3014,14 @@ export const notificationAPI = {
     
     if (!response.ok) {
       const errorText = await response.text()
-      console.error('❌ Notification creation failed:', errorText)
       throw new Error(errorText || `Failed to create notification: ${response.status}`)
     }
     
     const result = await response.json()
-    console.log('✅ Notification creation response:', result)
     
     // The API returns { "approvals": [], "tasks": [] } structure
     // We need to check if our notification was added to either array
     if (result.success && result.data) {
-      console.log('📧 Notifications in approvals:', result.data.approvals?.length || 0)
-      console.log('📧 Notifications in tasks:', result.data.tasks?.length || 0)
     }
     
     return result
@@ -3330,8 +3031,6 @@ export const notificationAPI = {
   investigateNotificationAPI: async () => {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
-    
-    console.log('🔍 Investigating notification API structure...')
     
     // Try different possible notification endpoints
     const endpointsToTry = [
@@ -3374,8 +3073,6 @@ export const notificationAPI = {
     
     for (const endpoint of endpointsToTry) {
       try {
-        console.log(`🔍 Trying endpoint: ${endpoint}`)
-        
         // Try POST method first
         const postUrl = `${API_BASE_URL}${endpoint}`
         const headers = {
@@ -3409,7 +3106,6 @@ export const notificationAPI = {
           try {
             const responseData = await response.json()
             results[endpoint].data = responseData
-            console.log(`✅ POST ${endpoint} succeeded:`, responseData)
           } catch (e) {
             results[endpoint].data = 'Could not parse response'
           }
@@ -3427,7 +3123,6 @@ export const notificationAPI = {
       }
     }
     
-    console.log('🔍 Notification API investigation results:', results)
     return results
   },
 
@@ -3436,29 +3131,21 @@ export const notificationAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     
-    console.log('🔍 Checking if notifications are created automatically...')
-    console.log('🔍 Order ID:', orderId, 'Action:', action)
-    
     // First, get current notifications
     try {
       const beforeNotifications = await notificationAPI.getUserNotifications()
-      console.log('🔍 Notifications BEFORE action:', beforeNotifications)
       
       // Wait a bit for any async operations
       await new Promise(resolve => setTimeout(resolve, 2000))
       
       // Get notifications again
       const afterNotifications = await notificationAPI.getUserNotifications()
-      console.log('🔍 Notifications AFTER action:', afterNotifications)
       
       // Compare the two
       const beforeApprovals = beforeNotifications?.data?.approvals || []
       const afterApprovals = afterNotifications?.data?.approvals || []
       const beforeTasks = beforeNotifications?.data?.tasks || []
       const afterTasks = afterNotifications?.data?.tasks || []
-      
-      console.log('🔍 Approvals before:', beforeApprovals.length, 'after:', afterApprovals.length)
-      console.log('🔍 Tasks before:', beforeTasks.length, 'after:', afterTasks.length)
       
       // Check if any new notifications were created
       const newApprovals = afterApprovals.filter(after => 
@@ -3477,9 +3164,6 @@ export const notificationAPI = {
         )
       )
       
-      console.log('🔍 New approvals created:', newApprovals)
-      console.log('🔍 New tasks created:', newTasks)
-      
       return {
         success: true,
         before: beforeNotifications,
@@ -3490,7 +3174,6 @@ export const notificationAPI = {
       }
       
     } catch (error) {
-      console.error('❌ Failed to check notification creation:', error)
       return { success: false, error: error.message }
     }
   }

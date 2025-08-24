@@ -1,8 +1,18 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     eslint: {
-        ignoreDuringBuilds: true,
+      ignoreDuringBuilds: true,
     },
-};
-
-export default nextConfig;
+    async rewrites() {
+      return [
+        {
+          source: "/api/:path*",
+          destination: "http://alameenapp.runasp.net/api/:path*", 
+       
+        },
+      ];
+    },
+  };
+  
+  export default nextConfig;
+  

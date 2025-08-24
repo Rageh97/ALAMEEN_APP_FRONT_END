@@ -7,8 +7,8 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
 export const metadata = {
-  title: 'E-Commerce Store',
-  description: 'Beautiful e-commerce store with user authentication and admin dashboard',
+  title: 'AL Ameen',
+  description: 'AL Ameen',
 }
 
 export default function RootLayout({ children }) {

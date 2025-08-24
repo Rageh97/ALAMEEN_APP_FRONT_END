@@ -109,7 +109,7 @@ export default function RolesManagement() {
                 <div key={role.id || role.Id} className="card p-4 flex justify-between items-center">
                   <div>
                     <div className="font-semibold">{role.name || role.Name}</div>
-                    <div className="text-sm text-gray-600"> {role.nameAr || role.NameAr} </div>
+                    <div className="text-sm text-icons"> {role.nameAr || role.NameAr} </div>
                   </div>
                   <div className="flex gap-2">
                     <button className="btn-secondary" onClick={() => startEdit(role)}>تعديل</button>
@@ -170,7 +170,7 @@ export default function RolesManagement() {
               </div>
             </>
           ) : (
-            <div className="text-gray-600">Select a role from the list tab and click Permissions to manage its permissions.</div>
+            <div className="text-gray-400">يرجى اختيار صلاحية من القائمة لتحديث الأذونات.</div>
           )}
         </div>
       )}

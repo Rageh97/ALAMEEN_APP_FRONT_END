@@ -620,6 +620,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                 type="number"
                 placeholder="التكلفة *"
                 required
+                min="0"
                 className="input-field"
                 value={isEditing ? editingProduct.pointsCost : (newProduct.pointsCost ?? '')}
                 onChange={(e) => {
@@ -726,29 +727,33 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
               <table className="min-w-full divide-y divide-icons/40 text-center">
                 <thead className="bg-transparent">
                   <tr>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">رقم</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">النوع</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">مقدّم الطلب</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">المنتج</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">المبلغ/الكمية</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">الحالة</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">الصورة</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">الإجراءات</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">رقم</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">النوع</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">مقدّم الطلب</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">المنتج</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">المبلغ/الكمية</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الحالة</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الصورة</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-icons/40">
                   {orders && orders.length > 0 ? (
-                    orders.map((order) => {
+                    orders.map((order, index) => {
                       const orderId = order.id || order.Id
                       const isEditingThis = editingRequestId === orderId
                       const isRecharge = (order.amount != null || order.Amount != null) || String(order.typeValue || order.type || '').toLowerCase().includes('recharge')
+                      
+                      // Alternate row colors
+                      const rowBgClass = index % 2 === 0 ? 'bg-background-content-1' : 'bg-background-content-1/50'
+                      
                       return (
-                        <tr key={orderId}>
-                          <td className="px-4 py-3 text-sm">{orderId}</td>
-                          <td className="px-4 py-3 text-sm">{order.typeValue || order.type || (isRecharge ? 'شحن' : 'منتج')}</td>
-                          <td className="px-4 py-3 text-sm">{order.requestedByUserName || order.requestedByName || order.userName || '—'}</td>
-                          <td className="px-4 py-3 text-sm">{order.productName || order.product?.name || '—'}</td>
-                          <td className="px-4 py-3 text-sm">
+                        <tr key={orderId} className={rowBgClass}>
+                          <td className="px-4 py-3 text-sm text-center">{orderId}</td>
+                          <td className="px-4 py-3 text-sm text-center">{order.typeValue || order.type || (isRecharge ? 'شحن' : 'منتج')}</td>
+                          <td className="px-4 py-3 text-sm text-center">{order.requestedByUserName || order.requestedByName || order.userName || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-center">{order.productName || order.product?.name || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-center">
                             {isEditingThis ? (
                               isRecharge ? (
                                 <div className="space-y-2">
@@ -791,7 +796,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                               isRecharge ? (order.amount ?? order.Amount ?? '—') : (order.quantity ?? '—')
                             )}
                           </td>
-                          <td className="px-4 py-3 text-sm">{
+                          <td className="px-4 py-3 text-sm text-center">{
                             (() => {
                               const statusIsPending = (order.status === 0 || String(order.statusValue || '').toLowerCase() === 'pending')
                               const statusIsApproved = (order.status === 1 || String(order.statusValue || '').toLowerCase() === 'approved')
@@ -810,15 +815,15 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                               )
                             })()
                           }</td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-4 py-3 text-sm text-center">
                             <OrderImageCell 
                               orderId={orderId}
                               initialPath={order.transferImagePath || order.TransferImagePath || order.transferImage || order.TransferImage}
                             />
                           </td>
-                          <td className="px-4 py-3 text-sm">
+                          <td className="px-4 py-3 text-sm text-center">
                             {isEditingThis ? (
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center justify-center gap-2">
                                 {isRecharge && (
                                   <input type="file" accept="image/*" onChange={handleRequestFileChange} className="text-xs" />
                                 )}
@@ -827,7 +832,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                               </div>
                             ) : (
                               (order.status === 0 || String(order.statusValue || '').toLowerCase() === 'pending') ? (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-center gap-2">
                                   <button onClick={() => handleApprove(orderId)} className="btn-card bg-green-500 text-white px-3 py-1">Approve</button>
                                   <button onClick={() => handleReject(orderId)} className="btn-card bg-red-500 text-white px-3 py-1">Reject</button>
                                   <button 
@@ -842,7 +847,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                                   <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 bg-red-500 text-white border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
                   </div>
                               ) : (
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center justify-center gap-2">
                                   <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 text-white bg-red-500 border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
                 </div>
                               )
@@ -939,7 +944,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                       <select
                         name="settingId"
                         required
-                        className="input-field"
+                        className="input-field bg-background"
                       >
                         <option value="">اختر إعداداً</option>
                         {pointSettings && pointSettings.map(setting => (
@@ -951,7 +956,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-400 mb-1">
-                        المبلغ بالدولار ($)
+                        المبلغ  
                       </label>
                       <input
                         type="number"
@@ -980,7 +985,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                   <button
                     type="submit"
                     disabled={updatePointSetting.isPending}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+                    className="btn-primary hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     {updatePointSetting.isPending ? 'جاري التحديث...' : 'تحديث الإعداد'}
                   </button>
