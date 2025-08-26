@@ -9,6 +9,8 @@ import { usePointConversionSettings, useUpdatePointConversionSetting } from '../
 import EmployeeManagement from '../components/EmployeeManagement'
 import RolesManagement from '../components/RolesManagement'
 import UsersManagement from '../components/UsersManagement'
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal'
+import { formatDateTime, getRelativeTime, isToday, isYesterday } from '../utils/dateUtils'
 
 export default function AdminDashboard({ setCurrentView }) {
   const [activeTab, setActiveTab] = useState('products')
@@ -17,6 +19,8 @@ export default function AdminDashboard({ setCurrentView }) {
   const { 
     orders, 
     pendingOrders, 
+    totalItems,
+    currentPage,
     fetchOrders, 
     fetchPendingOrders, 
     approveRequest, 
@@ -32,14 +36,16 @@ export default function AdminDashboard({ setCurrentView }) {
     loading: ordersLoading
   } = useOrders()
 
-  // Ensure orders are fetched when user is available
+  // Ensure orders are fetched when user is available (optimized)
   useEffect(() => {
-    if (user && !authLoading) {
-      console.log('AdminDashboard: User available, fetching orders...')
-      fetchOrders()
+    if (user?.id && !authLoading) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('AdminDashboard: User available, fetching orders...')
+      }
+      fetchOrders(1, { pageNumber: 1, pageSize: 10, sortType: 'desc' })
       fetchPendingOrders()
     }
-  }, [user, authLoading])
+  }, [user?.id, authLoading, fetchOrders, fetchPendingOrders])
 
   // Renders the transfer image. Falls back to fetching by id if path is not present in list item.
   const OrderImageCell = ({ orderId, initialPath }) => {
@@ -69,7 +75,7 @@ export default function AdminDashboard({ setCurrentView }) {
       </a>
     )
   }
-const ImagePath = "api/AppMedia/"
+const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
   // Point conversion settings
   const { 
     data: pointSettings, 
@@ -97,6 +103,15 @@ const ImagePath = "api/AppMedia/"
   const [editingRequestType, setEditingRequestType] = useState(null) // 'recharge' | 'product'
   const [requestEditForm, setRequestEditForm] = useState({ amount: '', quantity: '', transferImage: null, transferImagePath: '' })
   const [editingRequestOrder, setEditingRequestOrder] = useState(null)
+
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    itemId: null,
+    itemType: '', // 'product', 'order'
+    itemName: '',
+    onConfirm: null
+  })
 
   // Show loading while auth is being determined
   if (authLoading) {
@@ -256,14 +271,23 @@ const ImagePath = "api/AppMedia/"
   }
 
   const handleDeleteProduct = async (id) => {
-    if (window.confirm('Are you sure you want to delete this product?')) {
-      try {
-        await deleteProduct(id)
-        // Products list will be refreshed automatically by the hook
-      } catch (error) {
-        console.error('Failed to delete product:', error)
+    const product = products.find(p => p.id === id)
+    setDeleteModal({
+      isOpen: true,
+      itemId: id,
+      itemType: 'product',
+      itemName: product?.name || `المنتج #${id}`,
+      onConfirm: async () => {
+        try {
+          await deleteProduct(id)
+          setDeleteModal({ isOpen: false, itemId: null, itemType: '', itemName: '', onConfirm: null })
+          // Products list will be refreshed automatically by the hook
+        } catch (error) {
+          console.error('Failed to delete product:', error)
+          setDeleteModal({ isOpen: false, itemId: null, itemType: '', itemName: '', onConfirm: null })
+        }
       }
-    }
+    })
   }
 
   const startEditing = (product) => {
@@ -480,31 +504,38 @@ const ImagePath = "api/AppMedia/"
 
   const handleDelete = async (id) => {
     if (!id) return
-    const ok = window.confirm('هل أنت متأكد أنك تريد حذف هذا الطلب؟')
-    if (!ok) return
-    const res = await deleteOrder(id)
-    if (res?.success) {
-      toast.success('تم حذف الطلب بنجاح!')
-    } else {
-      toast.error(res?.error || 'فشل في حذف الطلب')
-      return
-    }
-    // Local UI is updated by hook deleteOrder via fetchOrders, but ensure quick feedback
-    try { await fetchOrders() } catch {}
+    const order = orders.find(o => (o.id || o.Id) === id)
+    setDeleteModal({
+      isOpen: true,
+      itemId: id,
+      itemType: 'order',
+      itemName: `الطلب #${id}`,
+      onConfirm: async () => {
+        const res = await deleteOrder(id)
+        if (res?.success) {
+          toast.success('تم حذف الطلب بنجاح!')
+        } else {
+          toast.error(res?.error || 'فشل في حذف الطلب')
+        }
+        setDeleteModal({ isOpen: false, itemId: null, itemType: '', itemName: '', onConfirm: null })
+        // Local UI is updated by hook deleteOrder via fetchOrders, but ensure quick feedback
+        try { await fetchOrders() } catch {}
+      }
+    })
   }
 
 
 
   return (
     
-    <div className="space-y-6 px-3 lg:px-0 ">
+    <div className="space-y-6 px-2 md:px-3 lg:px-0 max-w-full overflow-x-hidden">
       <h1 className="text-3xl font-bold">لوحة التحكم</h1>
       
       {/* Tabs */}
-      <div className="flex items-center justify-center flex-wrap space-x-4 gradient-border">
+      <div className="flex items-center justify-center flex-wrap gap-2 md:gap-4 gradient-border p-2">
           <button
           onClick={() => setActiveTab('products')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'products' 
               ? 'text-icons ' 
               : 'text-gray-400 hover:text-icons'
@@ -514,7 +545,7 @@ const ImagePath = "api/AppMedia/"
           </button>
           <button
           onClick={() => setActiveTab('orders')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'orders' 
               ? 'text-icons ' 
               : 'text-gray-400 hover:text-icons'
@@ -524,7 +555,7 @@ const ImagePath = "api/AppMedia/"
           </button>
           <button
           onClick={() => setActiveTab('employees')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'employees' 
               ? 'text-icons ' 
               : 'text-gray-400 hover:text-icons'
@@ -534,7 +565,7 @@ const ImagePath = "api/AppMedia/"
           </button>
           <button
           onClick={() => setActiveTab('roles')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'roles' 
               ? 'text-icons ' 
               : 'text-gray-400 hover:text-icons'
@@ -544,7 +575,7 @@ const ImagePath = "api/AppMedia/"
         </button>
         <button
           onClick={() => setActiveTab('users')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'users' 
               ? 'text-icons ' 
               : 'text-gray-400 hover:text-icons'
@@ -555,7 +586,7 @@ const ImagePath = "api/AppMedia/"
         
         <button
           onClick={() => setActiveTab('points')}
-          className={`py-2 px-4 font-semibold ${
+          className={`py-2 px-3 md:px-4 font-semibold text-sm md:text-base whitespace-nowrap ${
             activeTab === 'points' 
               ? 'text-icons' 
               : 'text-gray-400 hover:text-icons'
@@ -567,7 +598,7 @@ const ImagePath = "api/AppMedia/"
 
       {/* Products Tab */}
       {activeTab === 'products' && (
-        <div className="space-y-6 flex flex-col  justify-center px-3">
+        <div className="space-y-6 flex flex-col justify-center px-2 md:px-3">
           {/* Add/Edit Product Form */}
           <div className="card p-6">
             <h2 className="text-2xl font-bold mb-4">
@@ -665,7 +696,7 @@ const ImagePath = "api/AppMedia/"
           ) : productsError ? (
             <div className="text-center py-8 text-red-600">Error: {productsError}</div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 px-2 md:px-3">
               {products && products.length > 0 ? products.map(product => (
                 <div key={product.id} className="card gradient-border-2 gap-6 overflow-hidden">
                 <img 
@@ -730,7 +761,7 @@ const ImagePath = "api/AppMedia/"
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">رقم</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">النوع</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">مقدّم الطلب</th>
-                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">المنتج</th>
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">تاريخ الطلب</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">المبلغ/الكمية</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الحالة</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الصورة</th>
@@ -752,7 +783,20 @@ const ImagePath = "api/AppMedia/"
                           <td className="px-4 py-3 text-sm text-center">{orderId}</td>
                           <td className="px-4 py-3 text-sm text-center">{order.typeValue || order.type || (isRecharge ? 'شحن' : 'منتج')}</td>
                           <td className="px-4 py-3 text-sm text-center">{order.requestedByUserName || order.requestedByName || order.userName || '—'}</td>
-                          <td className="px-4 py-3 text-sm text-center">{order.productName || order.product?.name || '—'}</td>
+                          <td className="px-4 py-3 text-sm text-center">
+                            {order.creationTime ? (
+                              <div className="flex flex-col items-center">
+                                <span className="font-medium">
+                                  {formatDateTime(order.creationTime)}
+                                </span>
+                                {/* <span className="text-xs text-gray-500">
+                                  {getRelativeTime(order.creationTime)}
+                                </span> */}
+                              </div>
+                            ) : (
+                              order.product?.name || '—'
+                            )}
+                          </td>
                           <td className="px-4 py-3 text-sm text-center">
                             {isEditingThis ? (
                               isRecharge ? (
@@ -804,12 +848,12 @@ const ImagePath = "api/AppMedia/"
                               const label = statusIsPending ? 'في الانتظار' : statusIsApproved ? 'تمت الموافقة' : statusIsRejected ? 'مرفوض' : (order.statusValue || order.status || '—')
                               const base = 'inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium'
                               const cls = statusIsPending
-                                ? 'bg-yellow-400 text-black'
+                                ? 'btn-status text-yellow-500 inner-shadow'
                                 : statusIsApproved
-                                  ? 'bg-green-400 text-black'
+                                  ? 'btn-status text-green-500 inner-shadow'
                                   : statusIsRejected
-                                    ? 'bg-red-400 text-white'
-                                    : 'bg-gray-100 text-gray-800'
+                                    ? 'btn-status text-red-500 inner-shadow'
+                                    : 'btn-status text-red-500 inner-shadow'
                               return (
                                 <span className={`${base} ${cls}`}>{label}</span>
                               )
@@ -833,22 +877,42 @@ const ImagePath = "api/AppMedia/"
                             ) : (
                               (order.status === 0 || String(order.statusValue || '').toLowerCase() === 'pending') ? (
                                 <div className="flex items-center justify-center gap-2">
-                                  <button onClick={() => handleApprove(orderId)} className="btn-card bg-green-500 text-white px-3 py-1">Approve</button>
-                                  <button onClick={() => handleReject(orderId)} className="btn-card bg-red-500 text-white px-3 py-1">Reject</button>
+                                  <button onClick={() => handleApprove(orderId)} className="text-green-500 cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+</button>
+                                  <button onClick={() => handleReject(orderId)} className="cursor-pointer text-red-600">
+
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
+                                  </button>
                                   <button 
                                     onClick={() => {
                                       console.log('Edit button clicked for order:', order)
                                       startEditingRequest(order)
                                     }} 
-                                    className="btn-card px-3 py-1"
+                                    className="text-icons cursor-pointer"
                                   >
-                                    Edit
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+</svg>
+
                                   </button>
-                                  <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 bg-red-500 text-white border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
+                                  <button onClick={() => handleDelete(orderId)} className="text-orange-500 cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+</button>
                   </div>
                               ) : (
                                 <div className="flex items-center justify-center gap-2">
-                                  <button onClick={() => handleDelete(orderId)} className="btn-card px-3 py-1 text-white bg-red-500 border-red-400 hover:bg-red-500 hover:text-white">Delete</button>
+                                  <button onClick={() => handleDelete(orderId)} className="text-orange-500 cursor-pointer">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+
+                                  </button>
                 </div>
                               )
                             )}
@@ -863,6 +927,40 @@ const ImagePath = "api/AppMedia/"
                   )}
                 </tbody>
               </table>
+              {/* Pagination */}
+              <div className="flex items-center justify-between p-4">
+                <button
+                  onClick={() => fetchOrders(Math.max(1, (currentPage || 1) - 1), { pageNumber: Math.max(1, (currentPage || 1) - 1), pageSize: 10, sortType: 'desc' })}
+                  className="btn-secondary text-xs p-2"
+                  disabled={(currentPage || 1) <= 1}
+                >
+                  السابق
+                </button>
+                <div className="text-sm text-icons">
+                  {(() => {
+                    const page = currentPage || 1
+                    const size = 10
+                    const total = totalItems || 0
+                    if (!total) return `الصفحة ${page}`
+                    const maxPage = Math.max(1, Math.ceil(total / size))
+                    return maxPage > 1 ? `الصفحة ${page} / ${maxPage}` : `الصفحة ${page}`
+                  })()}
+                </div>
+                <button
+                  onClick={() => fetchOrders((currentPage || 1) + 1, { pageNumber: (currentPage || 1) + 1, pageSize: 10, sortType: 'desc' })}
+                  className="btn-primary text-xs p-2"
+                  disabled={(() => {
+                    const page = currentPage || 1
+                    const size = 10
+                    const total = totalItems || 0
+                    if (!total) return orders.length < size
+                    const maxPage = Math.max(1, Math.ceil(total / size))
+                    return page >= maxPage
+                  })()}
+                >
+                  التالي
+                </button>
+              </div>
               </div>
           )}
         </div>
@@ -902,7 +1000,7 @@ const ImagePath = "api/AppMedia/"
                         <div className="space-y-2 text-sm">
                           {/* <p><span className="font-medium">المبلغ بالدولار:</span> ${setting.amountInMoney}</p> */}
                           {/* <p><span className="font-medium">النقاط المكافئة:</span> {setting.equivalentPoints} نقطة</p> */}
-                          <p><span className="font-medium">معدل التحويل:</span> 1 = {(setting.equivalentPoints / (setting.amountInMoney || 1)).toFixed(2)} نقطة</p>
+                          <p><span className="font-medium">معدل التحويل:</span> 1 = {(setting.equivalentPoints / (setting.amountInMoney || 1))} نقطة</p>
                         </div>
                       </div>
                     ))}
@@ -959,9 +1057,10 @@ const ImagePath = "api/AppMedia/"
                         المبلغ  
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="amountInMoney"
-                        
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         min="0"
                         required
                         className="input-field"
@@ -973,8 +1072,10 @@ const ImagePath = "api/AppMedia/"
                         النقاط المكافئة
                       </label>
                       <input
-                        type="number"
+                        type="text"
                         name="equivalentPoints"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         min="1"
                         required
                         className="input-field"
@@ -1002,6 +1103,18 @@ const ImagePath = "api/AppMedia/"
       )}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, itemId: null, itemType: '', itemName: '', onConfirm: null })}
+        onConfirm={deleteModal.onConfirm}
+        title={deleteModal.itemType === 'product' ? 'حذف المنتج' : 'حذف الطلب'}
+        message={deleteModal.itemType === 'product' ? 'هل أنت متأكد أنك تريد حذف هذا المنتج؟' : 'هل أنت متأكد أنك تريد حذف هذا الطلب؟'}
+        itemName={deleteModal.itemName}
+        confirmText="حذف"
+        cancelText="إلغاء"
+      />
     </div>
   )
 } 

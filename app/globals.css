@@ -2,6 +2,10 @@
 
 @import "./tailwind.css";
 
+html {
+  overflow-x: hidden;
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
@@ -29,6 +33,7 @@ body {
   width: 100vw;
   height: 100vh;
   position: relative;
+  overflow-x: hidden;
 }
 .gradient-border-2 {
   position: relative;
@@ -86,6 +91,9 @@ body {
   }
   .btn-card{
     @apply bg-[#4f008c] py-2 px-4 rounded-xl
+  }
+  .btn-status{
+    @apply bg-gradient-to-r from-background/60 via-background-content-1 to-background/60 py-2 px-4 rounded-xl cursor-pointer;
   }
 }
 /* .................................................................................. */

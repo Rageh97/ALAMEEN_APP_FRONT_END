@@ -12,7 +12,7 @@ export default function LayoutContent({ children }) {
   return (
     <div className="min-h-screen">
       {!isAuthPage && isAuthenticated && <Navigation />}
-      <main className={isAuthPage ? "w-full" : "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8"}>
+      <main className={isAuthPage ? "w-full" : "max-w-7xl mx-auto py-4 sm:px-6 lg:px-8"}>
         {children}
       </main>
     </div>

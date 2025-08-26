@@ -28,7 +28,7 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="bg-gradient-to-r from-background-content-1 to-background-content-3 shadow-lg">
+      <nav className="bg-gradient-to-r from-background-content-1 to-background-content-3 shadow-lg sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
@@ -40,7 +40,7 @@ export default function Navigation() {
             <div className="hidden md:flex items-center space-x-4">
               <button
                 onClick={() => navigateTo('/')}
-                className="flex items-center px-3 py-2 text-white-700 hover:text-icons transition-colors"
+                className="flex items-center px-3 py-2 cursor-pointer text-white-700 hover:text-icons transition-colors"
               >
                 <HomeIcon className="h-5 w-5 mx-2 text-icons" />
                 الرئيسية
@@ -65,14 +65,14 @@ export default function Navigation() {
                 <>
                   <button
                     onClick={() => navigateTo('/orders')}
-                    className="flex items-center px-3 py-2 text-white-700 hover:text-icons transition-colors"
+                    className="flex items-center px-3 py-2 cursor-pointer text-white-700 hover:text-icons transition-colors"
                   >
                     <ClipboardDocumentListIcon className="h-5 w-5 mx-2 text-icons" />
                     طلباتي
                   </button>
                   <button
                     onClick={() => navigateTo('/notifications')}
-                    className="flex items-center px-3 py-2 text-white-700 hover:text-icons transition-colors relative"
+                    className="flex items-center px-3 py-2 cursor-pointer text-white-700 hover:text-icons transition-colors relative"
                   >
                     <BellIcon className="h-7 w-7 mx-1 text-icons" />
                     
@@ -85,19 +85,32 @@ export default function Navigation() {
                   {user?.isAdmin && (
                     <button
                       onClick={() => navigateTo('/admin')}
-                      className="flex items-center px-3 py-2 text-text hover:text-icons transition-colors"
+                      className="flex items-center px-3 py-2 cursor-pointer text-text hover:text-icons transition-colors"
                     >
                       <CogIcon className="h-5 w-5 mx-2 text-icons" />
                       لوحة التحكم
                     </button>
                   )}
-                  <div className="flex items-center space-x-2">
-                    <UserIcon className="h-5 w-5 text-icons mx-2" />
-                    <span className="text-sm text-text">{user?.userName}</span>
-                  </div>
+                  <button
+                    onClick={() => navigateTo('/profile')}
+                    className="flex items-center space-x-2 hover:text-icons transition-colors"
+                  >
+                    {(() => {
+                      const path = user?.profilePath || user?.ProfilePath || ''
+                      const isAbsolute = /^https?:\/\//i.test(path)
+                      const base = 'http://alameenapp.runasp.net/AppMedia/'
+                      const src = path ? (isAbsolute ? path : `${base}${path}`) : ''
+                      return src ? (
+                        <img src={src} alt="avatar" className="h-6 w-6 rounded-full object-cover mx-2 border border-gray-700" />
+                      ) : (
+                        <UserIcon className="h-5 w-5 text-icons mx-2 cursor-pointer" />
+                      )
+                    })()}
+                    <span className="text-sm text-text cursor-pointer">{user?.userName}</span>
+                  </button>
                   <button
                     onClick={handleSignOut}
-                    className="flex items-center space-x-2 mx-2"
+                    className="flex items-center space-x-2 mx-2 cursor-pointer"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="size-4 text-icons mx-2">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
@@ -220,6 +233,14 @@ export default function Navigation() {
                       )}
                       
                       {/* User Profile */}
+                      <button
+                        onClick={() => navigateTo('/profile')}
+                        className="w-full flex items-center px-4 py-3 text-white hover:bg-icons transition-colors"
+                      >
+                        <UserIcon className="h-5 w-5 mx-3 text-icons" />
+                        الملف الشخصي
+                      </button>
+                      
                       <div className="px-4 py-3 border-t border-gray-200">
                         <div className="flex items-center">
                           <UserIcon className="h-5 w-5 mx-3 text-icons" />

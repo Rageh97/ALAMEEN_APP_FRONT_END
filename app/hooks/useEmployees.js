@@ -7,25 +7,38 @@ export const useEmployees = (params = {}) => {
   return useQuery({
     queryKey: ['employees', params],
     queryFn: async () => {
-      const data = await employeesAPI.getAll({
+      const requestParams = {
         pageNumber: params.pageNumber || 1,
         pageSize: params.pageSize || 10,
-        filterValue: params.filterValue || '',
-        filterType: params.filterType || '',
-        sortType: params.sortType || '',
-        dateFrom: params.dateFrom || '',
-        dateTo: params.dateTo || '',
-        balance: params.balance || 0,
-        roleName: params.roleName || '',
-        roleId: params.roleId != null ? params.roleId : undefined,
-        name: params.name || '',
-        userName: params.userName || '',
-        phoneNumber: params.phoneNumber || ''
-      })
-      if (Array.isArray(data)) return data
-      if (data && Array.isArray(data.items)) return data.items
-      if (data && Array.isArray(data.data)) return data.data
-      return []
+        // Pass the rest as-is; api layer will sanitize/mapping filters
+        filterValue: params.filterValue,
+        filterType: params.filterType,
+        sortType: params.sortType,
+        dateFrom: params.dateFrom,
+        dateTo: params.dateTo,
+        balance: params.balance,
+        roleName: params.roleName,
+        name: params.name,
+        userName: params.userName,
+        phoneNumber: params.phoneNumber
+      }
+      console.log('useEmployees - request params:', requestParams)
+      const data = await employeesAPI.getAll(requestParams)
+      console.log('useEmployees - raw API response:', data)
+
+      // Extract items list
+      let items = []
+      if (Array.isArray(data)) items = data
+      else if (data && Array.isArray(data.items)) items = data.items
+      else if (data && Array.isArray(data.data)) items = data.data
+
+      // totalItems from common keys; fallback to items length
+      const totalItems = (
+        data?.totalItems ?? data?.TotalItems ?? data?.total ?? data?.Total ?? data?.totalCount ?? data?.TotalCount ?? items.length
+      )
+      const currentPage = Number(requestParams.pageNumber) || 1
+
+      return { items, totalItems: Number(totalItems) || 0, currentPage }
     },
     enabled: typeof window !== 'undefined' && !!localStorage.getItem('authToken')
   })

@@ -3,14 +3,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { ordersAPI, usersAPI, notificationAPI } from '../utils/api'
 
-// Debug: Check if notificationAPI is properly imported
-console.log('🔍 useOrders hook - notificationAPI imported:', {
-  hasNotificationAPI: !!notificationAPI,
-  notificationAPIType: typeof notificationAPI,
-  notificationAPIKeys: notificationAPI ? Object.keys(notificationAPI) : 'N/A',
-  hasCreateNotification: !!notificationAPI?.createNotification,
-  createNotificationType: typeof notificationAPI?.createNotification
-})
+// Debug: Check if notificationAPI is properly imported (only in development)
+if (process.env.NODE_ENV === 'development') {
+  console.log('🔍 useOrders hook - notificationAPI imported:', {
+    hasNotificationAPI: !!notificationAPI,
+    notificationAPIType: typeof notificationAPI,
+    notificationAPIKeys: notificationAPI ? Object.keys(notificationAPI) : 'N/A',
+    hasCreateNotification: !!notificationAPI?.createNotification,
+    createNotificationType: typeof notificationAPI?.createNotification
+  })
+}
 
 export const useOrders = () => {
   const [orders, setOrders] = useState([])
@@ -111,7 +113,8 @@ export const useOrders = () => {
       // setError removed - using toast notifications only
       const safeFilters = {
         pageNumber: filters.pageNumber || 1,
-        pageSize: filters.pageSize || 100
+        pageSize: filters.pageSize || 10,
+        sortType: filters.sortType || 'desc'
       }
       if (filters.filterValue && filters.filterValue.trim() !== '') safeFilters.filterValue = filters.filterValue.trim()
       if (filters.filterType && filters.filterType.trim() !== '') safeFilters.filterType = filters.filterType.trim()
@@ -147,13 +150,46 @@ export const useOrders = () => {
       let combined = extractOrderList(primaryData)
       console.log('📋 fetchOrders extracted orders:', combined?.length || 0, 'orders')
 
-      // If caller didn't specify a type, fetch both types and merge to avoid backend omissions
+      // Fallback sort on client by creationTime DESC so latest come first
+      try {
+        const toTime = (o) => {
+          const t = o?.creationTime || o?.CreationTime || o?.createdAt || o?.CreatedAt
+          const d = t ? new Date(t) : null
+          return d ? d.getTime() : 0
+        }
+        combined = (combined || []).slice().sort((a, b) => toTime(b) - toTime(a))
+      } catch {}
+
+      // Capture total items for pagination if provided by API
+      try {
+        const total = (
+          primaryData?.totalItems ??
+          primaryData?.TotalItems ??
+          primaryData?.total ??
+          primaryData?.Total ??
+          primaryData?.totalCount ??
+          primaryData?.TotalCount ??
+          (Array.isArray(combined) ? combined.length : 0)
+        )
+        setTotalItems(Number(total) || 0)
+      } catch (e) {
+        console.warn('useOrders.fetchOrders: failed to parse totalItems')
+        setTotalItems(Array.isArray(combined) ? combined.length : 0)
+      }
+      // Track current page
+      try {
+        const resolvedPage = Number(safeFilters.pageNumber) || Number(page) || 1
+        setCurrentPage(resolvedPage)
+      } catch {}
+
+      // If caller didn't specify a type, optionally fetch both types and merge to avoid backend omissions
       const hasExplicitType = (
         (filters.type !== undefined && filters.type !== null && filters.type !== '') ||
         (filters.typeValue && filters.typeValue.trim() !== '')
       )
+      const shouldMergeTypes = (!hasExplicitType && filters.mergeTypes === true)
 
-      if (!hasExplicitType) {
+      if (shouldMergeTypes) {
         try {
           const results = await Promise.allSettled([
             ordersAPI.getAll({ ...safeFilters, type: 1 }),
@@ -179,7 +215,7 @@ export const useOrders = () => {
       console.log('🔄 fetchOrders setting orders state with:', combined?.length || 0, 'orders')
       setOrders(combined)
       // Normalize orders to ensure consistent keys for UI rendering
-      setOrders(prev => (combined || []).map(o => {
+      setOrders(prev => (prev || []).map(o => {
         const resolvedId = (o?.id ?? o?.Id)
         const resolvedAmount = (
           o?.amount != null ? Number(o.amount) :
@@ -1323,20 +1359,21 @@ export const useOrders = () => {
   
 
 
-  useEffect(() => {
-    fetchOrders()
-    fetchPendingOrders()
-  }, [fetchOrders, fetchPendingOrders])
+  // Removed automatic API calls to prevent performance issues
+  // useEffect(() => {
+  //   fetchOrders()
+  //   fetchPendingOrders()
+  // }, [fetchOrders, fetchPendingOrders])
   
-  // Debug: Monitor myOrders state changes
+  // Debug: Monitor myOrders state changes (development only)
   useEffect(() => {
-    console.log('🔍 useOrders hook - myOrders state changed:', {
-      myOrders,
-      myOrdersLength: myOrders?.length || 0,
-      myOrdersType: typeof myOrders,
-      myOrdersIsArray: Array.isArray(myOrders),
-      myOrdersKeys: myOrders ? Object.keys(myOrders) : 'N/A'
-    })
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 useOrders hook - myOrders state changed:', {
+        myOrdersLength: myOrders?.length || 0,
+        myOrdersType: typeof myOrders,
+        myOrdersIsArray: Array.isArray(myOrders)
+      })
+    }
   }, [myOrders])
 
 
@@ -1688,6 +1725,8 @@ export const useOrders = () => {
     myOrders,
     pendingOrders,
     loading,
+    totalItems,
+    currentPage,
     fetchOrders,
     fetchMyOrders,
     fetchPendingOrders,

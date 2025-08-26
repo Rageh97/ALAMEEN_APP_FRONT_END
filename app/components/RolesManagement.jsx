@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRoles, useCreateRole, useUpdateRole, useDeleteRole, useUpdateRolePermissions } from '../hooks/useRoles'
+import DeleteConfirmationModal from './DeleteConfirmationModal'
 
 export default function RolesManagement() {
   const [activeTab, setActiveTab] = useState('list')
@@ -9,6 +10,14 @@ export default function RolesManagement() {
   const [editingRoleId, setEditingRoleId] = useState(null)
   const [roleForm, setRoleForm] = useState({ name: '', nameAr: '', nameEn: '' })
   const [permissions, setPermissions] = useState([{ type: '', value: '' }])
+
+  // Delete confirmation modal state
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    itemId: null,
+    itemName: '',
+    onConfirm: null
+  })
 
   const { data: roles, isLoading, error, refetch } = useRoles({ pageNumber: 1, pageSize: 20 })
   const createRoleMutation = useCreateRole()
@@ -42,9 +51,17 @@ export default function RolesManagement() {
   }
 
   const handleDelete = async (id) => {
-    if (!window.confirm('Delete this role?')) return
-    await deleteRoleMutation.mutateAsync(id)
-    refetch()
+    const role = roles?.find(r => (r.id || r.Id) === id)
+    setDeleteModal({
+      isOpen: true,
+      itemId: id,
+      itemName: role?.name || role?.Name || `الصلاحية #${id}`,
+      onConfirm: async () => {
+        await deleteRoleMutation.mutateAsync(id)
+        setDeleteModal({ isOpen: false, itemId: null, itemName: '', onConfirm: null })
+        refetch()
+      }
+    })
   }
 
   const handlePermissionChange = (index, key, value) => {
@@ -89,12 +106,7 @@ export default function RolesManagement() {
         >
           اضافة / تعديل الصلاحية
         </button>
-        <button
-          onClick={() => setActiveTab('permissions')}
-          className={`text-sm  md:text-lg py-2 px-4 font-semibold ${activeTab === 'permissions' ? 'text-icons' : 'text-gray-500 hover:text-icons'}`}
-        >
-          الصلاحيات
-        </button>
+       
       </div>
 
       {activeTab === 'list' && (
@@ -112,9 +124,12 @@ export default function RolesManagement() {
                     <div className="text-sm text-icons"> {role.nameAr || role.NameAr} </div>
                   </div>
                   <div className="flex gap-2">
-                    <button className="btn-secondary" onClick={() => startEdit(role)}>تعديل</button>
-                    <button className="btn-secondary" onClick={() => { setIsEditing(true); setEditingRoleId(role.id || role.Id); setActiveTab('permissions') }}>الصلاحيات</button>
-                    <button className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg" onClick={() => handleDelete(role.id || role.Id)}>حذف</button>
+                    <button className="btn-primary  gradient-border-2 text-sm p-2" onClick={() => startEdit(role)}>تعديل</button>
+                    <button className="cursor-pointer text-orange-500" onClick={() => handleDelete(role.id || role.Id)}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+                    </button>
                   </div>
                 </div>
               )) : (
@@ -174,6 +189,18 @@ export default function RolesManagement() {
           )}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={deleteModal.isOpen}
+        onClose={() => setDeleteModal({ isOpen: false, itemId: null, itemName: '', onConfirm: null })}
+        onConfirm={deleteModal.onConfirm}
+        title="حذف الصلاحية"
+        message="هل أنت متأكد أنك تريد حذف هذه الصلاحية؟"
+        itemName={deleteModal.itemName}
+        confirmText="حذف"
+        cancelText="إلغاء"
+      />
     </div>
   )
 }

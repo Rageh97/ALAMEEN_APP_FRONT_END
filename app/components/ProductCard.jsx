@@ -5,7 +5,7 @@ import "@/app/globals.css"
 
 export default function ProductCard({ product }) {
   const { addToCart, openCartModal } = useCart()
-  const ImagePath = "api/AppMedia/"
+  const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
 
   const handleAddToCart = () => {
     addToCart(product)
@@ -25,7 +25,7 @@ export default function ProductCard({ product }) {
         <div className="w-full">
           <button
             onClick={handleAddToCart}
-            className="w-full btn-card px-4 py-2 rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header"
+            className="w-full btn-card cursor-pointer px-4 py-2 rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header"
           >
            <span className="text-white font-bold">تقديم طلب</span>
            <span className="text-sm font-bold text-icons">${product?.pointsCost}</span>

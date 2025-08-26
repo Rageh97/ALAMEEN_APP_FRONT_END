@@ -12,7 +12,7 @@ const apiRequest = async (endpoint, options = {}) => {
   const config = {
     headers: {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       ...options.headers
     },
     ...options
@@ -64,7 +64,7 @@ export const authAPI = {
       const response = await fetch(`${API_BASE_URL}/Auth/GetToken`, {
         method: 'GET',
         headers: {
-          'lang': 'en'
+          'lang': 'ar'
         }
       })
 
@@ -136,13 +136,11 @@ export const authAPI = {
   // Login endpoint
   signIn: async (userName, password) => {
     try {
-    
-      
-      const response = await fetch(`${API_BASE_URL}/Auth/login`, {
+      let response = await fetch(`${API_BASE_URL}/Auth/login`, {
       method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'lang': 'en'
+          'lang': 'ar'
         },
       body: JSON.stringify({ userName, password })
     })
@@ -150,6 +148,22 @@ export const authAPI = {
 
 
       if (!response.ok) {
+        // Retry once with PascalCase keys in case backend binder expects them
+        try {
+          const retry = await fetch(`${API_BASE_URL}/Auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'lang': 'ar'
+            },
+            body: JSON.stringify({ UserName: userName, Password: password })
+          })
+          if (retry.ok) {
+            const result = await retry.json()
+            return result
+          }
+          response = retry
+        } catch {}
        
         let errorMessage = `HTTP error! status: ${response.status}`
         try {
@@ -217,7 +231,7 @@ export const authAPI = {
       // Add optional Authorization header if token exists (as in Swagger example)
       const token = localStorage.getItem('authToken')
       const headers = {
-        'lang': 'en'
+        'lang': 'ar'
       }
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
@@ -321,7 +335,7 @@ export const productsAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
@@ -424,7 +438,7 @@ export const productsAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
@@ -504,7 +518,7 @@ export const productsAPI = {
 
 
       const headers = {
-        'lang': 'en'
+        'lang': 'ar'
       }
 
       // Add authorization header with token from login
@@ -586,7 +600,7 @@ export const productsAPI = {
 
 
       const headers = {
-        'lang': 'en'
+        'lang': 'ar'
       }
 
       // Add authorization header with token from login
@@ -653,7 +667,7 @@ export const productsAPI = {
       }
       
       const headers = {
-        'lang': 'en'
+        'lang': 'ar'
       }
 
       // Add authorization header with token from login
@@ -717,7 +731,7 @@ export const ordersAPI = {
     const url = `${API_BASE_URL}/UserRequest`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -827,7 +841,7 @@ export const ordersAPI = {
     const url = `${API_BASE_URL}/UserRequest/GetPending`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -930,11 +944,12 @@ export const ordersAPI = {
     return await response.json()
   },
 
+
   getById: async (id) => {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/UserRequest/${id}`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'GET', headers })
     if (response.status === 401) {
       try {
@@ -957,7 +972,7 @@ export const ordersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/UserRequest/${id}`
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'DELETE', headers })
     if (response.status === 401) {
       try {
@@ -1002,7 +1017,7 @@ export const ordersAPI = {
       console.log(`  ${key}:`, value)
     }
     
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     console.log('📋 Headers:', headers)
     
     const doAttempt = async (attemptUrl) => {
@@ -1140,7 +1155,7 @@ export const ordersAPI = {
     
     
     
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
 
     const doAttempt = async (attemptUrl, method = 'PUT') => {
      
@@ -1248,7 +1263,7 @@ export const ordersAPI = {
 
 
 
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
 
     const doAttempt = async (attemptUrl) => {
       let resp = await fetch(attemptUrl, { method: 'POST', headers, body: JSON.stringify(apiPayload) })
@@ -1304,7 +1319,7 @@ export const ordersAPI = {
     ]
     
         
-        const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+        const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
         
     const doAttempt = async (attemptUrl, method = 'PUT') => {
       let resp = await fetch(attemptUrl, { method, headers, body: JSON.stringify(data) })
@@ -1390,7 +1405,7 @@ export const ordersAPI = {
     
     
     
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     
     const doAttempt = async (method = 'PUT') => {
      
@@ -1478,7 +1493,7 @@ export const ordersAPI = {
     
     
     
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     
     const doAttempt = async (method = 'PUT') => {
      
@@ -1557,7 +1572,7 @@ export const ordersAPI = {
     const url = `${API_BASE_URL}/UserRequest/GetMyRequests`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -1610,7 +1625,7 @@ export const ordersAPI = {
     const url = `${API_BASE_URL}/UserRequest/GetMyRequests`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -1710,7 +1725,7 @@ export const ordersAPI = {
       const url1 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
       
@@ -1740,7 +1755,7 @@ export const ordersAPI = {
       const url2 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
       
@@ -1783,7 +1798,7 @@ export const ordersAPI = {
       const url3 = `${API_BASE_URL}/UserRequest/GetMyRequests`
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
       
@@ -1816,7 +1831,7 @@ export const ordersAPI = {
     const url = `${API_BASE_URL}/UserRequest/GetMyRequests`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -1876,25 +1891,70 @@ export const employeesAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
+      // Build request body; backend expects POST with optional filterType/filterValue and pagination
+      // Include schema fields per Swagger
       const requestBody = {
         pageNumber: Math.max(1, params.pageNumber || 1),
         pageSize: Math.max(1, Math.min(100, params.pageSize || 10))
       }
-      if (params.filterValue && params.filterValue.trim()) requestBody.filterValue = params.filterValue.trim()
-      if (params.filterType && params.filterType.trim()) requestBody.filterType = params.filterType.trim()
-      if (params.sortType && params.sortType.trim()) requestBody.sortType = params.sortType.trim()
-      if (params.dateFrom && params.dateFrom.trim()) requestBody.dateFrom = params.dateFrom.trim()
-      if (params.dateTo && params.dateTo.trim()) requestBody.dateTo = params.dateTo.trim()
-      if (params.balance !== undefined && params.balance !== null) requestBody.balance = params.balance
-      if (params.roleName && params.roleName.trim()) requestBody.roleName = params.roleName.trim()
-      if (params.roleId !== undefined && params.roleId !== null && params.roleId !== '') requestBody.roleId = Number(params.roleId)
-      if (params.name && params.name.trim()) requestBody.name = params.name.trim()
-      if (params.userName && params.userName.trim()) requestBody.userName = params.userName.trim()
-      if (params.phoneNumber && params.phoneNumber.trim()) requestBody.phoneNumber = params.phoneNumber.trim()
+      // Collect raw fields per Swagger
+      const raw = {
+        filterType: params.filterType,
+        filterValue: params.filterValue,
+        sortType: params.sortType,
+        dateFrom: params.dateFrom,
+        dateTo: params.dateTo,
+        balance: params.balance,
+        roleName: params.roleName,
+        name: params.name,
+        userName: params.userName,
+        phoneNumber: params.phoneNumber
+      }
+      // Map a single-field filter to filterType/filterValue if explicit not provided
+      try {
+        const hasExplicit = (raw.filterType && String(raw.filterType).trim() !== '' && raw.filterValue != null && String(raw.filterValue).trim() !== '')
+        if (!hasExplicit) {
+          const candidates = [
+            ['Name', raw.name],
+            ['UserName', raw.userName],
+            ['PhoneNumber', raw.phoneNumber],
+            ['RoleName', raw.roleName]
+          ]
+          const picked = candidates.find(([_, v]) => v != null && String(v).trim() !== '')
+          if (picked) {
+            requestBody.filterType = picked[0]
+            requestBody.filterValue = String(picked[1]).trim()
+          }
+        } else {
+          requestBody.filterType = String(raw.filterType).trim()
+          requestBody.filterValue = String(raw.filterValue).trim()
+        }
+      } catch {}
+      // Only include optional fields if non-empty (avoid sending empty strings that may break backend)
+      const includeIf = (key, value) => {
+        if (value === undefined || value === null) return
+        const s = typeof value === 'string' ? value.trim() : value
+        if (s === '' || (typeof s === 'number' && isNaN(s))) return
+        requestBody[key] = value
+      }
+      includeIf('sortType', raw.sortType)
+      includeIf('dateFrom', raw.dateFrom)
+      includeIf('dateTo', raw.dateTo)
+      includeIf('balance', raw.balance)
+      // If we did NOT set filterType/filterValue, fall back to named fields per Swagger
+      if (!requestBody.filterType && !requestBody.filterValue) {
+        includeIf('roleName', raw.roleName)
+        includeIf('name', raw.name)
+        includeIf('userName', raw.userName)
+        includeIf('phoneNumber', raw.phoneNumber)
+      }
+      
+      console.log('employeesAPI.getAll - request body:', requestBody)
+      console.log('employeesAPI.getAll - headers:', headers)
 
       let response = await fetch(url, {
       method: 'POST',
@@ -1937,7 +1997,7 @@ export const employeesAPI = {
 
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -1983,7 +2043,7 @@ export const employeesAPI = {
     })
 
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -2030,28 +2090,70 @@ export const employeesAPI = {
       throw new Error('No authentication token found. Please sign in first.')
     }
     
+    console.log('employeesAPI.update - input employeeData:', employeeData)
    
     const formData = new FormData()
+    
+    // Only send the fields that the EditEmployeeDto expects
+    const allowedFields = [
+      'Name', 'UserName', 'UserType', 'Mobile', 'Email', 
+      'IsActive', 'RoleId', 'UserId', 'Id', 'Balance', 
+      'Profile', 'SupervisorId'
+    ]
+    
+    // Always include the Id
     formData.append('Id', id.toString())
-    Object.keys(employeeData).forEach(key => {
-      const value = employeeData[key]
-      if (value !== undefined && value !== null && value !== '') {
+    
+    // Only append allowed fields that have values (cast types properly)
+    allowedFields.forEach(key => {
+      let value = employeeData[key]
+      if (value === undefined || value === null || value === '') return
+      if (key === 'Profile' && value instanceof File) {
         formData.append(key, value)
+        return
       }
+      if (['UserType', 'RoleId', 'UserId', 'Id', 'SupervisorId'].includes(key)) {
+        const num = Number(value)
+        if (!isNaN(num)) value = num
+      }
+      if (key === 'IsActive') {
+        value = !!value
+      }
+      if (key === 'Balance') {
+        const num = Number(value)
+        if (!isNaN(num)) value = num
+      }
+      formData.append(key, String(value))
     })
+    
+    console.log('employeesAPI.update - formData entries:')
+    for (let [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`)
+    }
     
    
 
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
+    // Primary: some environments only allow POST for this endpoint
+    let methodTried = 'POST'
     let response = await fetch(`${API_BASE_URL}/Employee/Edit/${id}`, {
-      method: 'PUT',
+      method: 'POST',
       headers,
       body: formData
     })
+    // Fallback to PUT if POST not allowed
+    if (!response.ok && (response.status === 405 || response.status === 404)) {
+      methodTried = 'PUT'
+      response = await fetch(`${API_BASE_URL}/Employee/Edit/${id}`, {
+        method: 'PUT',
+        headers,
+        body: formData
+      })
+    }
     if (response.status === 401) {
       try {
         await authAPI.getToken()
@@ -2059,10 +2161,19 @@ export const employeesAPI = {
         if (refreshedToken) {
           headers['Authorization'] = `Bearer ${refreshedToken}`
           response = await fetch(`${API_BASE_URL}/Employee/Edit/${id}`, {
-            method: 'PUT',
+            method: methodTried,
             headers,
             body: formData
           })
+          // If refreshed attempt still not allowed, try the alternate verb once more
+          if (!response.ok && response.status === 405) {
+            const alternate = methodTried === 'POST' ? 'PUT' : 'POST'
+            response = await fetch(`${API_BASE_URL}/Employee/Edit/${id}`, {
+              method: alternate,
+              headers,
+              body: formData
+            })
+          }
         }
       } catch {}
     }
@@ -2080,7 +2191,7 @@ export const employeesAPI = {
     }
 
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -2118,7 +2229,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
@@ -2154,7 +2265,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/getallList`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'GET', headers })
@@ -2181,7 +2292,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/${id}`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'GET', headers })
@@ -2208,7 +2319,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/register`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(data) })
@@ -2235,7 +2346,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/Edit/${id}`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(data) })
@@ -2262,7 +2373,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/UpdatePermissions`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     // Note: backend expects property name 'permisions'
@@ -2290,7 +2401,7 @@ export const rolesAPI = {
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Roles/${id}`
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'DELETE', headers })
@@ -2317,7 +2428,7 @@ export const rolesAPI = {
     const url = `${API_BASE_URL}/Roles/deleterange`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(ids || []) })
@@ -2349,25 +2460,46 @@ export const usersAPI = {
     const url = `${API_BASE_URL}/Users`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
 
     const body = {
       pageNumber: Math.max(1, params.pageNumber || 1),
-      pageSize: Math.max(1, Math.min(100, params.pageSize || 10)),
-      filterValue: params.filterValue || '',
-      filterType: params.filterType || '',
-      sortType: params.sortType || '',
-      isLocked: params.isLocked ?? undefined,
-      name: params.name || '',
-      mobile: params.mobile || '',
-      isActive: params.isActive ?? undefined,
-      userType: params.userType ?? undefined,
-      roleId: params.roleId ?? undefined
+      pageSize: Math.max(1, Math.min(100, params.pageSize || 10))
     }
-    // Remove undefined keys
-    Object.keys(body).forEach(k => body[k] === undefined && delete body[k])
+    const raw = {
+      filterValue: params.filterValue,
+      filterType: params.filterType,
+      sortType: params.sortType,
+      isLocked: params.isLocked,
+      name: params.name,
+      mobile: params.mobile,
+      isActive: params.isActive,
+      userType: params.userType,
+      roleId: params.roleId
+    }
+    // Include sortType if present
+    if (raw.sortType && String(raw.sortType).trim() !== '') body.sortType = String(raw.sortType).trim()
+    // Include isLocked only if explicitly boolean
+    if (typeof raw.isLocked === 'boolean') body.isLocked = raw.isLocked
+    // Only pass filterType/filterValue if explicitly provided by caller
+    if (raw.filterType && String(raw.filterType).trim() !== '' && raw.filterValue != null && String(raw.filterValue).trim() !== '') {
+      body.filterType = String(raw.filterType).trim()
+      body.filterValue = String(raw.filterValue).trim()
+    }
+    // Special-case: backend often expects Name via filterType/filterValue
+    if (!body.filterType && raw.name && String(raw.name).trim() !== '') {
+      body.filterType = 'Name'
+      body.filterValue = String(raw.name).trim()
+    }
+    // Include direct fields per Swagger if provided
+    if (raw.mobile && String(raw.mobile).trim() !== '') body.mobile = String(raw.mobile).trim()
+    if (raw.roleId != null && raw.roleId !== '') body.roleId = Number(raw.roleId)
+    if (raw.userType != null && raw.userType !== '') body.userType = Number(raw.userType)
+    if (raw.isActive !== undefined && raw.isActive !== null && raw.isActive !== '') body.isActive = !!raw.isActive
+    // Clean undefined
+    Object.keys(body).forEach(k => (body[k] === undefined || body[k] === null) && delete body[k])
 
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) })
     if (response.status === 401) {
@@ -2391,7 +2523,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/GetDropDown`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'GET', headers })
     if (response.status === 401) {
       try {
@@ -2414,7 +2546,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/GetDropDownExceptEmployee`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'GET', headers })
     if (response.status === 401) {
       try {
@@ -2437,7 +2569,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/${id}`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'GET', headers })
     if (response.status === 401) {
       try {
@@ -2463,7 +2595,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/${id}`
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'DELETE', headers })
     if (response.status === 401) {
       try {
@@ -2486,7 +2618,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/changepassword/${id}`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     const payload = { password, rePassword }
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) })
     if (response.status === 401) {
@@ -2515,26 +2647,35 @@ export const usersAPI = {
     if (data.Name) query.set('Name', data.Name)
     if (data.UserName) query.set('UserName', data.UserName)
     if (data.UserType != null && data.UserType > 0) query.set('UserType', String(data.UserType))
-    if (data.Mobile) query.set('Mobile', data.Mobile)
+    if (data.Mobile != null && data.Mobile !== '') query.set('Mobile', data.Mobile)
     if (data.IsActive != null) query.set('IsActive', String(data.IsActive))
-    if (data.RoleId != null && data.RoleId > 0) query.set('RoleId', String(data.RoleId))
+    // RoleId is required by backend - always include it
+    if (data.RoleId != null) query.set('RoleId', String(data.RoleId))
     if (data.Balance != null) query.set('Balance', String(data.Balance))
     
     console.log('Query string:', query.toString())
+    console.log('Mobile value being sent:', data.Mobile)
 
     const url = `${API_BASE_URL}/Users/Edit/${id}?${query.toString()}`
-    const formData = new FormData()
-    if (data.Profile) formData.append('Profile', data.Profile)
 
-    const headers = { 'lang': 'en', 'Authorization': `Bearer ${token}` }
-    let response = await fetch(url, { method: 'POST', headers, body: formData })
+    // Only send multipart if a file is chosen
+    const hasFile = !!data.Profile
+    let body = undefined
+    if (hasFile) {
+      const formData = new FormData()
+      formData.append('Profile', data.Profile)
+      body = formData
+    }
+
+    const headers = { 'lang': 'ar', 'Authorization': `Bearer ${token}` }
+    let response = await fetch(url, { method: 'POST', headers, body })
     if (response.status === 401) {
       try {
         await authAPI.getToken()
         const refreshedToken = localStorage.getItem('authToken')
         if (refreshedToken) {
           headers['Authorization'] = `Bearer ${refreshedToken}`
-          response = await fetch(url, { method: 'POST', headers, body: formData })
+          response = await fetch(url, { method: 'POST', headers, body })
         }
       } catch {}
     }
@@ -2549,7 +2690,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/deleterange`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(ids || []) })
     if (response.status === 401) {
       try {
@@ -2572,7 +2713,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/UserTypeDropDown`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     let response = await fetch(url, { method: 'GET', headers })
     if (response.status === 401) {
       try {
@@ -2595,7 +2736,7 @@ export const usersAPI = {
     const token = localStorage.getItem('authToken')
     if (!token) throw new Error('No authentication token found. Please sign in first.')
     const url = `${API_BASE_URL}/Users/getByType`
-    const headers = { 'Content-Type': 'application/json', 'lang': 'en', 'Authorization': `Bearer ${token}` }
+    const headers = { 'Content-Type': 'application/json', 'lang': 'ar', 'Authorization': `Bearer ${token}` }
     // API expects a raw number in the body
     let response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(userType) })
     if (response.status === 401) {
@@ -2630,7 +2771,7 @@ export const pointConversionAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
@@ -2696,7 +2837,7 @@ export const pointConversionAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
@@ -2760,7 +2901,7 @@ export const pointConversionAPI = {
 
       const headers = {
         'Content-Type': 'application/json',
-        'lang': 'en',
+        'lang': 'ar',
         'Authorization': `Bearer ${token}`
       }
 
@@ -2823,7 +2964,7 @@ export const notificationAPI = {
     const url = `${API_BASE_URL}/Notification`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -2862,7 +3003,7 @@ export const notificationAPI = {
     
     const url = `${API_BASE_URL}/Notification/GetUserNotifications`
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -2896,7 +3037,7 @@ export const notificationAPI = {
     
     const url = `${API_BASE_URL}/Notification/MarkAsRead/${notificationId}`
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -2940,7 +3081,7 @@ export const notificationAPI = {
     
     const url = `${API_BASE_URL}/Notification/MarkAsReadAll`
     const headers = {
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -2987,7 +3128,7 @@ export const notificationAPI = {
     const url = `${API_BASE_URL}/Notification`
     const headers = {
       'Content-Type': 'application/json',
-      'lang': 'en',
+      'lang': 'ar',
       'Authorization': `Bearer ${token}`
     }
     
@@ -3077,7 +3218,7 @@ export const notificationAPI = {
         const postUrl = `${API_BASE_URL}${endpoint}`
         const headers = {
           'Content-Type': 'application/json',
-          'lang': 'en',
+          'lang': 'ar',
           'Authorization': `Bearer ${token}`
         }
         

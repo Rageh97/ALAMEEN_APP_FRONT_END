@@ -154,7 +154,8 @@ export default function RechargeRequest({ isOpen, onClose }) {
                   المبلغ
                 </label>
                 <input
-                  type="number"
+                  type="text"
+                  pattern="[0-9]*"
                   id="amount"
                   name="amount"
                   value={formData.amount}

@@ -6,6 +6,7 @@ import { useOrders } from '../hooks/useOrders'
 import { useAuth } from '../hooks/useAuth'
 import OrderConfirmation from './OrderConfirmation'
 import { XMarkIcon } from '@heroicons/react/24/outline'
+import { toast } from 'react-toastify'
 
 export default function CartSummary() {
   const { cart, updateQuantity, getCartTotal, getCartItemCount, clearCart, removeFromCart, isCartValid, getCartValidationErrors, isCartModalOpen, openCartModal, closeCartModal } = useCart()
@@ -20,29 +21,10 @@ export default function CartSummary() {
   const [showConfirmation, setShowConfirmation] = useState(false)
   const [customUserId, setCustomUserId] = useState('')
   const [orderForOther, setOrderForOther] = useState(false)
-  const [toasts, setToasts] = useState([])
 
-  // Debug toasts state changes
-  useEffect(() => {
-    console.log('Toasts state changed:', toasts)
-  }, [toasts])
 
-  const pushToast = (text, type = 'success', durationMs = 2500) => {
-    const id = `${Date.now()}-${Math.random()}`
-    console.log('Pushing toast:', { text, type, durationMs, id })
-    setToasts(prev => {
-      const newToasts = [...prev, { id, text, type }]
-      console.log('New toasts array:', newToasts)
-      return newToasts
-    })
-    setTimeout(() => {
-      setToasts(prev => {
-        const filteredToasts = prev.filter(t => t.id !== id)
-        console.log('Removing toast, remaining:', filteredToasts)
-        return filteredToasts
-      })
-    }, durationMs)
-  }
+
+ 
 
   // Don't render anything if cart is empty
   if (cart.length === 0) {
@@ -61,8 +43,7 @@ export default function CartSummary() {
     
     if (orderForOther && !customUserId) {
       setIsProcessing(false)
-      setMessage('')
-      pushToast('يرجى إدخال معرف المستخدم المستهدف.', 'error')
+      setMessage('يرجى إدخال معرف المستخدم المستهدف.')
       return
     }
 
@@ -81,15 +62,9 @@ export default function CartSummary() {
         
         const result = await createProductOrder(orderData, user)
         results.push({ item, ...result })
-        if (result?.success) {
-          pushToast(`تم تقديم الطلب بنجاح: ${item.name} ×${item.quantity}`, 'success')
-        } else {
-          pushToast(`فشل في تقديم الطلب: ${item.name}`, 'error')
-        }
       } catch (error) {
         console.error('Error creating order for item:', item, error)
         results.push({ item, success: false, error: error.message })
-        pushToast(`فشل في تقديم الطلب: ${item.name}`, 'error')
       }
     }
 
@@ -110,7 +85,7 @@ export default function CartSummary() {
       clearCart()
       setShowOrderDetails(true)
       setShowConfirmation(true)
-      pushToast('تم تقديم جميع الطلبات بنجاح! 🎉', 'success', 4000)
+      toast.success('تم تقديم  الطلب بنجاح! 🎉')
     } else if (successfulOrders.length > 0) {
       console.log('Partial success, showing warning toast')
       setMessage(`⚠️ نجح ${successfulOrders.length} طلب، وفشل ${failedOrders.length} طلب. تحقق من التفاصيل أدناه.`)
@@ -118,12 +93,12 @@ export default function CartSummary() {
       successfulOrders.forEach(result => removeFromCart(result.item.id))
       setShowOrderDetails(true)
       setShowConfirmation(true)
-      pushToast(`نجح ${successfulOrders.length} طلب، وفشل ${failedOrders.length} طلب`, 'warning', 4000)
+      toast.warning(`نجح ${successfulOrders.length} طلب، وفشل ${failedOrders.length} طلب`)
     } else {
       console.log('All orders failed, showing error toast')
       setMessage(`❌ فشلت جميع الطلبات. يرجى المحاولة مرة أخرى.`)
       setShowOrderDetails(true)
-      pushToast('فشلت جميع الطلبات', 'error', 4000)
+      toast.error('فشلت جميع الطلبات')
     }
     setIsProcessing(false)
     setProcessingStep('')
@@ -142,7 +117,7 @@ export default function CartSummary() {
     setOrderResults([])
     setShowOrderDetails(false)
     closeCartModal()
-    pushToast('تم حذف الطلب', 'success')
+    toast.success('تم حذف الطلب')
   }
 
   const handleViewOrders = () => {
@@ -150,13 +125,9 @@ export default function CartSummary() {
     window.location.href = '/orders'
   }
 
-  const getStatusIcon = (success) => {
-    return success ? '✅' : '❌'
-  }
 
-  const getStatusColor = (success) => {
-    return success ? 'text-green-600' : 'text-red-600'
-  }
+
+
 
   const getCartSummary = () => {
     const totalItems = getCartItemCount()
@@ -170,6 +141,14 @@ export default function CartSummary() {
 
   const handleCustomUserId = () => {
     setCustomUserId('')
+  }
+
+  const getStatusColor = (success) => {
+    return success ? 'text-green-600' : 'text-red-600'
+  }
+
+  const getStatusIcon = (success) => {
+    return success ? '✅' : '❌'
   }
 
   return (
@@ -191,13 +170,7 @@ export default function CartSummary() {
         </div>
       </button>
 
-      {/* Test Toast Button */}
-      <button
-        onClick={() => pushToast('اختبار التوست!', 'success', 3000)}
-        className="fixed bottom-4 left-4 z-40 bg-green-600 hover:bg-green-700 text-white rounded-full p-4 shadow-lg transition-all duration-200"
-      >
-        🧪
-      </button>
+    
 
       {/* Modal Overlay - Only show if modal is open and user is loaded */}
       {isCartModalOpen && user && (
@@ -209,7 +182,7 @@ export default function CartSummary() {
           />
           
           {/* Modal Content */}
-          <div className="relative bg-background rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out">
+          <div className="relative bg-background gradient-border inner-shadow rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out">
             {/* Header */}
             <div className="flex items-center justify-between p-6 border-b border-gray-700/30">
               <h2 className="text-xl font-bold text-text">تقديم طلب</h2>
@@ -238,7 +211,7 @@ export default function CartSummary() {
                       className="text-icons"
                     />
                     <span className="text-sm text-icons">
-                      لنفسي {user && `(  ${user.id})`}
+                      لنفسي 
                     </span>
                   </label>
                 </div>
@@ -266,36 +239,18 @@ export default function CartSummary() {
                     />
                     <button
                       onClick={() => setCustomUserId('')}
-                      className="px-3 py-2 text-sm text-orange-500 hover:text-orange-400"
+                      className="px-3 py-2 text-sm text-orange-500 cursor-pointer hover:text-orange-400"
                     >
-                      حذف
+                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
                     </button>
                   </div>
                 </div>
-                
-                {/* Current Selection Display */}
-                <div className="mt-3 p-2 bg-background-content-3 rounded">
-                  <span className="text-sm text-icons font-medium">
-                    سيتم تقديم الطلبات لـ: 
-                    <span className="font-bold mr-1">
-                      {orderForOther && customUserId ? `المستخدم ${customUserId}` : (user ? `المستخدم ${user.id} (أنت)` : 'جاري التحميل...')}
-                    </span>
-                  </span>
-                </div>
+              
               </div>
               
-              {/* Processing Status */}
-              {isProcessing && (
-                <div className="mb-4 p-3 bg-background-content-1 border border-icons rounded-lg">
-                  <div className="flex items-center space-x-2">
-                    <div className="animate-spin text-icons">🔄</div>
-                    <div className="text-text">
-                      <div className="font-medium">جاري معالجة الطلبات...</div>
-                      <div className="text-sm">{processingStep}</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+          
               
               {/* Messages */}
               {message && (
@@ -429,19 +384,7 @@ export default function CartSummary() {
         />
       )}
 
-      {/* Toasts */}
-      {toasts.length > 0 && (
-        <div className="fixed top-4 right-4 z-[9999] space-y-2">
-          <div className="text-white text-xs bg-black p-1 rounded">
-            Toasts: {toasts.length}
-          </div>
-          {toasts.map(t => (
-            <div key={t.id} className={`px-4 py-2 rounded shadow text-sm border-2 ${t.type === 'error' ? 'bg-red-600 text-white border-red-800' : t.type === 'warning' ? 'bg-yellow-500 text-black border-yellow-600' : 'bg-green-600 text-white border-green-800'}`}>
-              {t.text}
-            </div>
-          ))}
-        </div>
-      )}
+
     </>
   )
 } 

@@ -18,10 +18,19 @@ export const useUsers = (filters = {}) => {
     queryKey: userKeys.list(filters),
     queryFn: async () => {
       const data = await usersAPI.getAll(filters)
-      if (Array.isArray(data)) return data
-      if (data?.items) return data.items
-      if (data?.data) return data.data
-      return []
+      // Extract items list
+      let items = []
+      if (Array.isArray(data)) items = data
+      else if (data && Array.isArray(data.items)) items = data.items
+      else if (data && Array.isArray(data.data)) items = data.data
+
+      // totalItems from common keys; fallback to items length
+      const totalItems = (
+        data?.totalItems ?? data?.TotalItems ?? data?.total ?? data?.Total ?? data?.totalCount ?? data?.TotalCount ?? items.length
+      )
+      const currentPage = Number(filters.pageNumber) || 1
+
+      return { items, totalItems: Number(totalItems) || 0, currentPage }
     },
   })
 }

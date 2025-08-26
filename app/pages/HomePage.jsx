@@ -5,7 +5,7 @@ import ProductCard from '../components/ProductCard'
 import { useProducts } from '../hooks/useProducts'
 import RechargeRequest from '../components/RechargeRequest'
 import CartSummary from '../components/CartSummary'
-import UserOrderHistory from '../components/UserOrderHistory'
+// import UserOrderHistory from '../components/UserOrderHistory'
 import { useMemo, useState } from 'react'
 import { usePointConversionSettings } from '../hooks/usePointConversion'
 
@@ -40,11 +40,10 @@ export default function HomePage() {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl text-red-600">User data not available. Please refresh the page.</div>
+        {/* <div className="text-xl text-red-600">User data not available. Please refresh the page.</div> */}
       </div>
     )
   }
-  console.log(products)
   return (
     <div className="space-y-6 px-5">
       <div className="flex justify-between items-center">
@@ -66,7 +65,7 @@ export default function HomePage() {
           </div>
           <button
             onClick={() => setShowRechargeForm(!showRechargeForm)}
-            className="btn-card px-4 py-2 rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header "
+            className="btn-card px-4 py-2 cursor-pointer rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header "
           >
             {showRechargeForm ? 'اغلاق' : 'طلب شحن'}
           </button>
