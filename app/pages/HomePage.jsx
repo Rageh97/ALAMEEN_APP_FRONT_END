@@ -46,13 +46,13 @@ export default function HomePage() {
   }
   return (
     <div className="space-y-6 px-5">
-      <div className="flex justify-between items-center">
-      <h2 className="text-lg lg:text-2xl font-semibold "> المنتجات المتاحة</h2>
-        <div className="flex flex-col items-center gap-3">
-          <div className="text-sm text-icons flex flex-col">
+      <div className="flex justify-start items-center">
+      {/* <h2 className="text-lg lg:text-2xl font-semibold "> المنتجات المتاحة</h2> */}
+        <div className="flex  items-center gap-3">
+          <div className="text-sm text-icons flex bg-icons/40 py-2 rounded-lg px-4 inner-shadow gap-5">
             <div>
 
-          <span className='text-text'>الرصيد:</span>   ${ (user.balance ?? user.Balance ?? 0) }
+          <span className='text-text'>الرصيد:</span>   { (user.balance ?? user.Balance ?? 0) }
             </div>
          
           <div>
@@ -84,10 +84,10 @@ export default function HomePage() {
       </div> */}
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 ">
         {/* Products Section */}
         <div className="lg:col-span-8 space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2  gap-6">
             {productsLoading ? (
               <div className="col-span-full text-center py-8">Loading products...</div>
             ) : error ? (
