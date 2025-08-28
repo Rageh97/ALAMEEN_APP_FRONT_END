@@ -3,6 +3,7 @@
 @import "./tailwind.css";
 
 html {
+  overflow-y: scroll; /* Reserve scrollbar space to prevent layout shift */
   overflow-x: hidden;
 }
 
@@ -30,8 +31,8 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed; */
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh; /* Avoid 100vh lock that causes bounce during route changes */
   position: relative;
   overflow-x: hidden;
 }

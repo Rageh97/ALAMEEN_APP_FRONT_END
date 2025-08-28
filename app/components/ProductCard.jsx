@@ -5,7 +5,7 @@ import "@/app/globals.css"
 
 export default function ProductCard({ product }) {
   const { addToCart, openCartModal } = useCart()
-  const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
+  // const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
 
   const handleAddToCart = () => {
     addToCart(product)
@@ -15,7 +15,7 @@ export default function ProductCard({ product }) {
   return (
     <div className="card overflow-hidden gradient-border-2 w-full">
       <img 
-        src={ImagePath + product?.path} 
+        src={`/media/${product?.path}`} 
         alt={product?.name} 
         className="w-full h-[250px] object-cover rounded-xl"
       />

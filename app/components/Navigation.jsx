@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { ShoppingBagIcon, UserIcon, CogIcon, HomeIcon, ClipboardDocumentListIcon, Bars3Icon, XMarkIcon, BellIcon } from '@heroicons/react/24/outline'
 import { useAuth } from '../hooks/useAuth'
 import { useUserNotifications } from '../hooks/useNotifications'
@@ -10,20 +11,20 @@ export default function Navigation() {
   const { user, signOut, isAuthenticated } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { data: notifications } = useUserNotifications()
+  const router = useRouter()
 
   // Calculate unread notifications count
   const unreadCount = notifications ? notifications.filter(n => !(n.isRead || n.IsRead)).length : 0
 
   const navigateTo = (path) => {
-    window.location.href = path
-    setIsMobileMenuOpen(false) // Close mobile menu after navigation
+    router.push(path)
+    setIsMobileMenuOpen(false)
   }
 
   const handleSignOut = () => {
     signOut()
-    setIsMobileMenuOpen(false) // Close mobile menu after logout
-    // Redirect to signin page after logout
-    navigateTo('/signin')
+    setIsMobileMenuOpen(false)
+    router.replace('/signin')
   }
 
   return (

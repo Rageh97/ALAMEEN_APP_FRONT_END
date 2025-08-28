@@ -75,7 +75,7 @@ export default function AdminDashboard({ setCurrentView }) {
       </a>
     )
   }
-const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
+const ImagePath = "/media/"
   // Point conversion settings
   const { 
     data: pointSettings, 

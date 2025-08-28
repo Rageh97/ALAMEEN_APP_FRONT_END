@@ -256,12 +256,12 @@ export default function OrdersPage() {
     return null
   }
 
-  const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
+  // const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
   const resolveImageSrc = (order) => {
     const path = order?.transferImagePath || order?.TransferImagePath || order?.transferImage || order?.TransferImage || ''
     if (!path) return ''
     const isAbsolute = /^https?:\/\//i.test(path)
-    return isAbsolute ? path : `${ImagePath}${path}`
+    return isAbsolute ? path : `/media/${path}`
   }
 
   const getStatusColor = (status) => {
@@ -545,15 +545,19 @@ export default function OrdersPage() {
                             <div className="flex items-center justify-center gap-2">
                               <button
                                 onClick={() => handleApproveRequest(request.id || request.Id)}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                                className="text-green-500 cursor-pointer"
                               >
-                                موافقة
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
                               </button>
                               <button
                                 onClick={() => handleRejectRequest(request.id || request.Id)}
-                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors"
+                                className="text-red-500 cursor-pointer"
                               >
-                                رفض
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
                               </button>
                             </div>
                           </td>
