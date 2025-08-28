@@ -1,4 +1,4 @@
-import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr'
+import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
 
 class SignalRService {
   constructor() {
@@ -22,12 +22,13 @@ class SignalRService {
       }
 
       // Create connection with authentication
+      const hubUrl = process.env.NEXT_PUBLIC_SIGNALR_URL || '/hub/notification'
+
       this.connection = new HubConnectionBuilder()
-        .withUrl('/hub/notification', {
+        .withUrl(hubUrl, {
           accessTokenFactory: () => token,
-          withCredentials: false,
-          transport: HttpTransportType.WebSockets,
-          skipNegotiation: true
+          withCredentials: false
+          // Allow negotiation and transport fallback for platforms that proxy or block WS
         })
         .configureLogging(LogLevel.Information)
         .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Reconnection intervals
