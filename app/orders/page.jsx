@@ -532,7 +532,7 @@ export default function OrdersPage() {
                             {isRecharge ? 'شحن رصيد' : (request.productName || `المنتج ${request.productId || request.ProductId || ''}`)}
                           </td>
                           <td className="px-2 md:px-4 py-2 md:py-3 text-sm">
-                            {isRecharge ? `$${request.amount || request.Amount || 0}` : (request.quantity || request.Quantity || 1)}
+                            {isRecharge ? `${request.amount || request.Amount || 0}` : (request.quantity || request.Quantity || 1)}
                           </td>
                           <td className="px-2 md:px-4 py-2 md:py-3 text-sm">
                             {imageSrc ? (
@@ -570,7 +570,7 @@ export default function OrdersPage() {
                 <div className="flex items-center justify-between p-3">
                   <button
                     onClick={() => setSupPage(p => Math.max(1, p - 1))}
-                    className="btn-secondary"
+                    className="btn-secondary text-sm p-2"
                     disabled={supPage <= 1}
                   >
                     السابق
@@ -578,7 +578,7 @@ export default function OrdersPage() {
                   <div className="text-sm text-text">الصفحة {supPage}</div>
                   <button
                     onClick={() => setSupPage(p => p + 1)}
-                    className="btn-primary"
+                    className="btn-primary text-sm p-2"
                     disabled={(Array.isArray(supervisorRequests) ? supervisorRequests.length : 0) < pageSize}
                   >
                     التالي

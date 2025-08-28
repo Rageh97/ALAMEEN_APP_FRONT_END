@@ -1,4 +1,4 @@
-import { HubConnectionBuilder, LogLevel } from '@microsoft/signalr'
+import { HubConnectionBuilder, LogLevel, HttpTransportType } from '@microsoft/signalr'
 
 class SignalRService {
   constructor() {
@@ -23,9 +23,11 @@ class SignalRService {
 
       // Create connection with authentication
       this.connection = new HubConnectionBuilder()
-        .withUrl('http://alameenapp.runasp.net/notificationHub', {
+        .withUrl('/hub/notification', {
           accessTokenFactory: () => token,
-          withCredentials: false
+          withCredentials: false,
+          transport: HttpTransportType.WebSockets,
+          skipNegotiation: true
         })
         .configureLogging(LogLevel.Information)
         .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Reconnection intervals
@@ -81,6 +83,16 @@ class SignalRService {
       console.log('✅ SignalR reconnected:', connectionId)
       this.isConnected = true
       this.reconnectAttempts = 0
+      // Re-join user group after reconnection if we know the user
+      try {
+        const storedUser = localStorage.getItem('userData')
+        const parsed = storedUser ? JSON.parse(storedUser) : null
+        if (parsed?.id) {
+          this.joinUserGroup(parsed.id)
+        }
+      } catch (e) {
+        console.warn('Failed to rejoin group after reconnect:', e)
+      }
     })
   }
 
@@ -225,13 +237,8 @@ class SignalRService {
     }
 
     try {
-      // Check if the method exists before calling it
-      if (this.connection.methods && this.connection.methods.includes('JoinUserGroup')) {
-        await this.connection.invoke('JoinUserGroup', userId)
-        console.log('✅ Joined user group:', userId)
-      } else {
-        console.log('ℹ️ JoinUserGroup method not available on server, skipping group join')
-      }
+      await this.connection.invoke('JoinUserGroup', userId)
+      console.log('✅ Joined user group:', userId)
       return true
     } catch (error) {
       // If method doesn't exist, just log and continue
@@ -251,13 +258,8 @@ class SignalRService {
     }
 
     try {
-      // Check if the method exists before calling it
-      if (this.connection.methods && this.connection.methods.includes('LeaveUserGroup')) {
-        await this.connection.invoke('LeaveUserGroup', userId)
-        console.log('✅ Left user group:', userId)
-      } else {
-        console.log('ℹ️ LeaveUserGroup method not available on server, skipping group leave')
-      }
+      await this.connection.invoke('LeaveUserGroup', userId)
+      console.log('✅ Left user group:', userId)
       return true
     } catch (error) {
       // If method doesn't exist, just log and continue

@@ -10,6 +10,10 @@ const nextConfig = {
           destination: "http://alameenapp.runasp.net/AppMedia/:path*", 
         },
         {
+          source: "/hub/notification",
+          destination: "http://alameenapp.runasp.net/notificationHub",
+        },
+        {
           source: "/api/:path*",
           destination: "http://alameenapp.runasp.net/api/:path*", 
        

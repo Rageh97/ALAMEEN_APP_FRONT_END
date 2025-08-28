@@ -48,7 +48,14 @@ export const useSignalR = () => {
 
     // Cleanup on unmount
     return () => {
-      signalRService.disconnect()
+      if (user?.id) {
+        // best effort leave, then disconnect
+        signalRService.leaveUserGroup(user.id).finally(() => {
+          signalRService.disconnect()
+        })
+      } else {
+        signalRService.disconnect()
+      }
     }
   }, [user?.id])
 
