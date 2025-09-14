@@ -70,7 +70,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className='w-full min-h-screen auth-container flex items-center justify-center'>
+    <div className='w-full min-h-screen auth-container px-3 flex items-center justify-center'>
       <div className="w-[100%] md:w-[50%] lg:w-[25%] mx-auto">
         <div className="card  gradient-border-2 p-8 w-full">
           <h2 className="text-3xl font-bold text-center mb-6">Sign In</h2>

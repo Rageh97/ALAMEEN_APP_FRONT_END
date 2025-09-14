@@ -154,7 +154,7 @@ export default function CartSummary() {
   return (
     <>
       {/* Cart Button to Open Modal */}
-      <button
+      {/* <button
         onClick={openCartModal}
         className="fixed bottom-4 right-4 z-40 bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 hover:from-background-content-3 hover:via-background-content-1 hover:to-background-content-3 text-white rounded-full p-4 shadow-lg transition-all duration-200 hover:scale-105"
       >
@@ -168,7 +168,7 @@ export default function CartSummary() {
             </span>
           )}
         </div>
-      </button>
+      </button> */}
 
     
 
@@ -234,7 +234,7 @@ export default function CartSummary() {
                       </span>
                     </div>
                   </label>
-                  <div className="mr-6 mt-2 flex items-center space-x-2">
+                  <div className="mr-0 lg:mr-6 mt-2 flex items-center ">
                     <input
                       type="text"
                       placeholder="أدخل معرف المستخدم"

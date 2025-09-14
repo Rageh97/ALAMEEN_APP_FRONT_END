@@ -48,8 +48,8 @@ export default function HomePage() {
     <div className="space-y-6 px-5">
       <div className="flex justify-start items-center">
       {/* <h2 className="text-lg lg:text-2xl font-semibold "> المنتجات المتاحة</h2> */}
-        <div className="flex  items-center gap-3">
-          <div className="text-sm text-icons flex bg-icons/40 py-2 rounded-lg px-4 inner-shadow gap-5">
+        <div className="flex  items-center gap-1 lg:gap-3">
+          <div className="text-xs lg:text-sm text-icons flex bg-icons/40 py-1 lg:py-2 rounded-lg px-2 lg:px-4 inner-shadow gap-2 lg:gap-5">
             <div>
 
           <span className='text-text'>الرصيد:</span>   { (user.balance ?? user.Balance ?? 0) }
@@ -65,7 +65,7 @@ export default function HomePage() {
           </div>
           <button
             onClick={() => setShowRechargeForm(!showRechargeForm)}
-            className="btn-card px-4 py-2 cursor-pointer rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header "
+            className="btn-card px-2 lg:px-4 py-1 lg:py-2 cursor-pointer rounded-xl bg-gradient-to-r from-background-content-1 via-background-content-3 to-background-content-1 text-white gradient-border-button-header text-xs lg:text-lg"
           >
             {showRechargeForm ? 'اغلاق' : 'طلب شحن'}
           </button>
