@@ -210,9 +210,10 @@ export default function CartSummary() {
                       onChange={() => { setOrderForOther(false); }}
                       className="text-icons"
                     />
-                    <span className="text-sm text-icons">
-                      لنفسي 
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-icons">لنفسي</span>
+                      <span className="text-xs text-gray-400">ID: {user?.id || 'غير محدد'}</span>
+                    </div>
                   </label>
                 </div>
 
@@ -226,7 +227,12 @@ export default function CartSummary() {
                       onChange={() => { setOrderForOther(true); }}
                       className="text-icons"
                     />
-                    <span className="text-sm text-icons">مستخدم آخر</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-icons">مستخدم آخر</span>
+                      <span className="text-xs text-gray-400">
+                        ID: {customUserId || 'يرجى إدخال معرف المستخدم'}
+                      </span>
+                    </div>
                   </label>
                   <div className="mr-6 mt-2 flex items-center space-x-2">
                     <input

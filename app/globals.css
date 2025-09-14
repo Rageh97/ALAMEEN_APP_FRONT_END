@@ -24,6 +24,7 @@ html {
 body {
   color: rgb(var(--foreground-rgb));
   /* background: linear-gradient(180deg, #070815, #070815, #105466) !important; */
+  /* background: linear-gradient(180deg, #181e25, #181e25, #4f4bf580, #2ccca750) !important; */
   background-color: #070815;
   font-family: 'Almarai', sans-serif;
   /* background-image: url("../public/bg-body.gif");

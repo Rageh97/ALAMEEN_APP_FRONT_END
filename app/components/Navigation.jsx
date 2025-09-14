@@ -71,7 +71,7 @@ export default function Navigation() {
                     <ClipboardDocumentListIcon className="h-5 w-5 mx-2 text-icons" />
                     طلباتي
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => navigateTo('/notifications')}
                     className="flex items-center px-3 py-2 cursor-pointer text-white-700 hover:text-icons transition-colors relative"
                   >
@@ -82,7 +82,7 @@ export default function Navigation() {
                         {unreadCount > 99 ? '99+' : unreadCount}
                       </span>
                     )}
-                  </button>
+                  </button> */}
                   {user?.isAdmin && (
                     <button
                       onClick={() => navigateTo('/admin')}
@@ -209,7 +209,7 @@ export default function Navigation() {
                       </button>
                       
                       {/* Notifications */}
-                      <button
+                      {/* <button
                         onClick={() => navigateTo('/notifications')}
                         className="w-full flex items-center px-4 py-3 text-white hover:bg-icons transition-colors relative"
                       >
@@ -220,7 +220,7 @@ export default function Navigation() {
                             {unreadCount > 99 ? '99+' : unreadCount}
                           </span>
                         )}
-                      </button>
+                      </button> */}
                       
                       {/* Admin Dashboard */}
                       {user?.isAdmin && (
