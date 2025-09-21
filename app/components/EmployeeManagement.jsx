@@ -358,7 +358,7 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                         const employeeMobile = employee.Mobile || employee.phoneNumber
                         const employeeBalance = employee.Balance || employee.balance
                         const employeeIsActive = employee.IsActive !== undefined ? employee.IsActive : employee.isActive
-                        const employeeProfile = employee.profilePath || employee.ProfilePath || ''
+                        const employeeProfile = employee.profilePath || employee.profilePath || ''
                         const employeeCreationTime = employee.CreationTime || employee.creationTime
                       
                       return (
@@ -366,7 +366,8 @@ const ImagePath = "http://alameenapp.runasp.net/AppMedia/"
                           <td className="px-4 py-3 text-sm text-center">
                             {employeeProfile ? (
                               <img 
-                                src={`${ImagePath}${employeeProfile}`} 
+                              
+                                src={`/media/${employeeProfile}`} 
                                 alt={employeeName}
                                 className="w-12 h-12 rounded-full object-cover mx-auto"
                               />
