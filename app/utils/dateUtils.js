@@ -22,8 +22,8 @@ export const formatDate = (dateString, options = {}) => {
     
     const mergedOptions = { ...defaultOptions, ...options }
     
-    // Format for Arabic locale
-    return date.toLocaleDateString('ar-SA', mergedOptions)
+    // Format for English locale (Milady/Gregorian calendar)
+    return date.toLocaleDateString('en-US', mergedOptions)
   } catch (error) {
     console.error('Error formatting date:', error)
     return '—'

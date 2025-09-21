@@ -761,6 +761,8 @@ const ImagePath = "/media/"
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">رقم</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">النوع</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">مقدّم الطلب</th>
+                    {/* <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">اسم المرسل</th> */}
+                    <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الطلب الى</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">تاريخ الطلب</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">المبلغ/الكمية</th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-icons uppercase tracking-wider">الحالة</th>
@@ -783,6 +785,8 @@ const ImagePath = "/media/"
                           <td className="px-4 py-3 text-sm text-center">{orderId}</td>
                           <td className="px-4 py-3 text-sm text-center">{order.typeValue || order.type || (isRecharge ? 'شحن' : 'منتج')}</td>
                           <td className="px-4 py-3 text-sm text-center">{order.requestedByUserName || order.requestedByName || order.userName || '—'}</td>
+                          {/* <td className="px-4 py-3 text-sm text-center">{order.requestedByUserName || order.sentByUserName || order.sentByName || '—'}</td> */}
+                          <td className="px-4 py-3 text-sm text-center">{order.forUserId || order.sentByUserId || order.sentById || '—'}</td>
                           <td className="px-4 py-3 text-sm text-center">
                             {order.creationTime ? (
                               <div className="flex flex-col items-center">
@@ -922,7 +926,7 @@ const ImagePath = "/media/"
                     })
                   ) : (
                     <tr>
-                      <td colSpan="8" className="px-4 py-6 text-center text-gray-400">لا توجد طلبات.</td>
+                      <td colSpan="10" className="px-4 py-6 text-center text-gray-400">لا توجد طلبات.</td>
                     </tr>
                   )}
                 </tbody>
